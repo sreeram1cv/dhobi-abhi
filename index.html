@@ -1,0 +1,1907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Narmada Hostel Laundry Booking Portal</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+  <!-- Top Header -->
+  <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-lg shadow-inner">
+          NH
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-bold text-base sm:text-lg tracking-tight">Narmada Hostel Laundry Portal</h1>
+            <span id="syncBadge" class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              346 Residents Loaded
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">24-Hour Continuous Slot Booking • Floors 0–3 • Real-Time Privacy &amp; Nudge Engine</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 flex-wrap">
+        <button id="btnOpenSyncModal" type="button" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-blue-400" id="syncDot"></span>
+          <span id="syncBtnLabel">Google Sheet Sync</span>
+        </button>
+
+        <div id="headerUserBox" class="hidden items-center gap-2 bg-slate-800/90 px-3 py-1.5 rounded-lg border border-slate-700">
+          <span id="headerUserLabel" class="text-xs font-medium text-slate-200"></span>
+          <button id="btnLogout" type="button" class="text-xs text-rose-400 hover:text-rose-300 font-semibold ml-2">
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Toast Banner -->
+  <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6">
+
+    <!-- ==================== VIEW 1: LOGIN & FIRST-TIME ACTIVATION ==================== -->
+    <section id="viewAuth" class="max-w-4xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <!-- Left Column: Auth Card -->
+        <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <!-- Mode Switch Tabs -->
+          <div class="grid grid-cols-2 border-b border-slate-200 bg-slate-50/60">
+            <button id="tabAuthStudent" type="button" class="py-3.5 text-sm font-semibold border-b-2 border-blue-600 text-blue-600 bg-white transition">
+              Student Login / Setup
+            </button>
+            <button id="tabAuthAdmin" type="button" class="py-3.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">
+              Admin Portal Login
+            </button>
+          </div>
+
+          <!-- Student Login Form -->
+          <div id="panelStudentAuth" class="p-6 space-y-5">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Narmada Resident Access</h2>
+              <p class="text-xs text-slate-500 mt-0.5">
+                First-time users: enter your Roll Number and verify your Room Number to create an encrypted password.
+              </p>
+            </div>
+
+            <!-- Step 1: Roll Number Input -->
+            <div class="space-y-2">
+              <label for="inputStudentRoll" class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
+                Student Roll Number
+              </label>
+              <div class="flex gap-2">
+                <input id="inputStudentRoll" list="rollList" type="text" placeholder="e.g. HS22H059, CS23B006, MM23B012"
+                  class="flex-1 rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <datalist id="rollList"></datalist>
+                <button id="btnCheckRoll" type="button" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-4 py-2.5 rounded-xl transition shrink-0">
+                  Continue
+                </button>
+              </div>
+              <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                <span class="text-[11px] text-slate-400">Quick sample residents:</span>
+                <button type="button" data-sample-roll="HS22H059" class="sample-roll-btn text-[11px] bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 px-2 py-0.5 rounded border border-slate-200">
+                  HS22H059 (Room 102)
+                </button>
+                <button type="button" data-sample-roll="CS23B006" class="sample-roll-btn text-[11px] bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 px-2 py-0.5 rounded border border-slate-200">
+                  CS23B006 (Room 134)
+                </button>
+                <button type="button" data-sample-roll="AE24B018" class="sample-roll-btn text-[11px] bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 px-2 py-0.5 rounded border border-slate-200">
+                  AE24B018 (Room 4001)
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 2A: First-Time Setup Box -->
+            <div id="boxFirstTimeSetup" class="hidden space-y-4 pt-3 border-t border-slate-100">
+              <div class="p-3.5 rounded-xl bg-blue-50 border border-blue-200 flex items-start justify-between gap-3">
+                <div>
+                  <span class="text-[11px] font-bold uppercase tracking-wider text-blue-700">First-Time Account Activation</span>
+                  <p id="setupStudentName" class="text-sm font-bold text-slate-900 mt-0.5"></p>
+                  <p id="setupStudentMeta" class="text-xs text-slate-600"></p>
+                </div>
+                <span class="text-xs font-semibold px-2 py-0.5 rounded bg-blue-100 text-blue-800">Step 2 of 2</span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label for="inputVerifyRoom" class="block text-xs font-semibold text-slate-700 mb-1">
+                    Verify Room Number <span class="text-rose-500">*</span>
+                  </label>
+                  <input id="inputVerifyRoom" type="number" placeholder="Enter your Narmada Room No"
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                  <label for="inputSetupPhone" class="block text-xs font-semibold text-slate-700 mb-1">
+                    Phone / WhatsApp Number <span class="text-rose-500">*</span>
+                  </label>
+                  <input id="inputSetupPhone" type="tel" placeholder="10-digit mobile number"
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label for="inputSetupEmail" class="block text-xs font-semibold text-slate-700 mb-1">
+                    Email (for 5-Min Expiry Nudge) <span class="text-rose-500">*</span>
+                  </label>
+                  <input id="inputSetupEmail" type="email" placeholder="rollno@smail.iitm.ac.in"
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                  <label for="inputSetupPassword" class="block text-xs font-semibold text-slate-700 mb-1">
+                    Create Password <span class="text-rose-500">*</span>
+                  </label>
+                  <input id="inputSetupPassword" type="password" placeholder="Min 4 characters"
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+              </div>
+
+              <button id="btnCompleteSetup" type="button" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl text-sm shadow-sm transition">
+                Verify Room &amp; Save Encrypted Password
+              </button>
+            </div>
+
+            <!-- Step 2B: Returning Student Password Box -->
+            <div id="boxReturningLogin" class="hidden space-y-4 pt-3 border-t border-slate-100">
+              <div class="p-3.5 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-between">
+                <div>
+                  <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Welcome Back</span>
+                  <p id="loginStudentName" class="text-sm font-bold text-slate-900"></p>
+                </div>
+                <span class="text-xs bg-emerald-100 text-emerald-800 font-medium px-2 py-0.5 rounded">Password Active</span>
+              </div>
+
+              <div>
+                <label for="inputLoginPassword" class="block text-xs font-semibold text-slate-700 mb-1">
+                  Enter Your Password
+                </label>
+                <input id="inputLoginPassword" type="password" placeholder="Enter your portal password"
+                  class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+
+              <button id="btnStudentSignIn" type="button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-sm shadow-sm transition">
+                Sign In to Laundry Portal
+              </button>
+            </div>
+          </div>
+
+          <!-- Admin Login Form -->
+          <div id="panelAdminAuth" class="hidden p-6 space-y-5">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <h2 class="text-lg font-bold text-slate-900">Narmada Admin &amp; Warden Control</h2>
+                <p class="text-xs text-slate-500 mt-0.5">
+                  Full visibility across all booked slots, machine health toggles, student directory, and complaints.
+                </p>
+              </div>
+              <button id="btnQuickFillAdmin" type="button" class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 px-2.5 py-1 rounded-lg font-medium shrink-0">
+                Auto-Fill Demo Admin
+              </button>
+            </div>
+
+            <div class="space-y-3.5">
+              <div>
+                <label for="inputAdminUser" class="block text-xs font-semibold text-slate-700 mb-1">Admin Username</label>
+                <input id="inputAdminUser" type="text" value="admin" placeholder="admin"
+                  class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label for="inputAdminPass" class="block text-xs font-semibold text-slate-700 mb-1">Admin Password</label>
+                <input id="inputAdminPass" type="password" value="narmada2026" placeholder="••••••••"
+                  class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <p class="text-[11px] text-slate-400 mt-1">Default master credentials: <code class="text-slate-600 font-mono">admin</code> / <code class="text-slate-600 font-mono">narmada2026</code></p>
+              </div>
+              <button id="btnAdminSignIn" type="button" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 rounded-xl text-sm shadow-sm transition">
+                Enter Admin Control Center
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Live Narmada Hostel Status Summary -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-slate-900">Narmada Live Machine Overview</h3>
+              <span class="text-xs font-medium text-slate-500">Floors 0 – 3</span>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2.5 text-center">
+              <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200">
+                <p id="statHealthyCount" class="text-xl font-bold text-emerald-700">17</p>
+                <p class="text-[11px] font-medium text-emerald-800">Healthy Machines</p>
+              </div>
+              <div class="p-3 rounded-xl bg-rose-50 border border-rose-200">
+                <p id="statSickCount" class="text-xl font-bold text-rose-700">2</p>
+                <p class="text-[11px] font-medium text-rose-800">Sick / Maintenance</p>
+              </div>
+              <div class="p-3 rounded-xl bg-blue-50 border border-blue-200">
+                <p id="statDailySlots" class="text-xl font-bold text-blue-700">334</p>
+                <p class="text-[11px] font-medium text-blue-800">Slots / 24 Hrs</p>
+              </div>
+            </div>
+
+            <div class="space-y-2 text-xs text-slate-600 border-t border-slate-100 pt-3">
+              <div class="flex items-start gap-2">
+                <span class="w-4 h-4 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">1</span>
+                <span><strong>Continuous 24-Hr Slotting:</strong> Resets cleanly at <code class="font-mono">00:00</code> daily (<code class="font-mono">65m</code> = 22 slots, <code class="font-mono">80m</code> = 18 slots, <code class="font-mono">100m</code> on RR9 = 14 slots).</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="w-4 h-4 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">2</span>
+                <span><strong>Next-Slot Privacy Protection:</strong> Booked slots stay private except to the resident holding the <em>very next slot</em> on that machine, who sees Room &amp; Phone details if laundry is left inside.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="w-4 h-4 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">3</span>
+                <span><strong>+5m Check-In &amp; T-5m Expiry Nudge:</strong> Unconfirmed slots auto-release so machines never sit idle.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 2: STUDENT PORTAL ==================== -->
+    <section id="viewStudent" class="hidden space-y-6">
+
+      <!-- Student Top Navigation & Active Booking Card -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800" id="stuBadgeRoll"></span>
+            <span class="text-xs font-medium text-slate-500" id="stuBadgeRoom"></span>
+          </div>
+          <h2 id="stuWelcomeTitle" class="text-lg font-bold text-slate-900 mt-1"></h2>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="tabStuBook" type="button" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-blue-600 text-white transition">
+            Book Laundry Slot
+          </button>
+          <button id="tabStuComplaint" type="button" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+            Report Machine Issue
+          </button>
+          <button id="btnEnableBrowserNotif" type="button" class="px-3 py-2 rounded-xl text-xs font-medium bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition">
+            Enable 5-Min Alerts
+          </button>
+        </div>
+      </div>
+
+      <!-- My Upcoming / Active Booking Card (with +5m Check-In, T-5m Expiry Nudge, and Previous User Contact) -->
+      <div id="stuActiveBookingContainer"></div>
+
+      <!-- Student Tab 1: Slot Booking View -->
+      <div id="panelStuBook" class="space-y-4">
+        <!-- Filters Bar: Date (Today / Tomorrow) & Floor Selector -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider mr-1">Date:</span>
+            <button id="btnDateToday" type="button" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 text-white transition"></button>
+            <button id="btnDateTomorrow" type="button" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition"></button>
+          </div>
+
+          <div class="flex items-center gap-1.5 flex-wrap" id="stuFloorTabs">
+            <button type="button" data-floor="ALL" class="stu-floor-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-blue-600 text-white">All Floors</button>
+            <button type="button" data-floor="0" class="stu-floor-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">Floor 0</button>
+            <button type="button" data-floor="1" class="stu-floor-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">Floor 1</button>
+            <button type="button" data-floor="2" class="stu-floor-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">Floor 2</button>
+            <button type="button" data-floor="3" class="stu-floor-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">Floor 3</button>
+          </div>
+        </div>
+
+        <!-- Hidden / Sick Machines Info Banner -->
+        <div id="stuSickMachinesNotice" class="bg-amber-50/90 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-900 flex items-center justify-between gap-2"></div>
+
+        <!-- Healthy Machines & Continuous Slots Grid -->
+        <div id="stuMachinesGrid" class="space-y-5"></div>
+      </div>
+
+      <!-- Student Tab 2: Maintenance & Complaint View -->
+      <div id="panelStuComplaint" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
+          <h3 class="text-base font-bold text-slate-900">Report a Washing Machine Issue</h3>
+          <p class="text-xs text-slate-500">Spot a machine that isn't spinning, draining, or has clothes left inside? Let the Narmada Admin team know.</p>
+
+          <div class="space-y-3">
+            <div>
+              <label for="inputCompMachine" class="block text-xs font-semibold text-slate-700 mb-1">Select Machine (Rest Room)</label>
+              <select id="inputCompMachine" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"></select>
+            </div>
+            <div>
+              <label for="inputCompType" class="block text-xs font-semibold text-slate-700 mb-1">Issue Category</label>
+              <select id="inputCompType" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
+                <option value="Drainage / Spin Issue">Drainage / Spin Issue</option>
+                <option value="Power / Machine Won't Start">Power / Machine Won't Start</option>
+                <option value="Water Supply / Leakage">Water Supply / Leakage</option>
+                <option value="Unattended Laundry Left Inside">Unattended Laundry Left Inside</option>
+                <option value="Other Mechanical Issue">Other Mechanical Issue</option>
+              </select>
+            </div>
+            <div>
+              <label for="inputCompDesc" class="block text-xs font-semibold text-slate-700 mb-1">Details</label>
+              <textarea id="inputCompDesc" rows="3" placeholder="Describe what happened..."
+                class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"></textarea>
+            </div>
+            <button id="btnSubmitComplaint" type="button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-sm transition">
+              Submit Maintenance Ticket
+            </button>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
+          <h3 class="text-base font-bold text-slate-900">My Reported Tickets</h3>
+          <div id="stuComplaintsList" class="space-y-3"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== VIEW 3: ADMIN PORTAL ==================== -->
+    <section id="viewAdmin" class="hidden space-y-6">
+
+      <!-- Admin Sub-Navigation Bar -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-amber-700 bg-amber-100 px-2 py-0.5 rounded">Full Admin Visibility Mode</span>
+          <h2 class="text-lg font-bold text-slate-900 mt-0.5">Narmada Hostel Control Center</h2>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-1.5">
+          <button type="button" data-admin-tab="bookings" class="admin-tab-btn px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-900 text-white">
+            1. All Bookings &amp; Slot Control
+          </button>
+          <button type="button" data-admin-tab="machines" class="admin-tab-btn px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">
+            2. Machine Health (19)
+          </button>
+          <button type="button" data-admin-tab="complaints" class="admin-tab-btn px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">
+            3. Complaints (<span id="adminOpenCompBadge">0</span>)
+          </button>
+          <button type="button" data-admin-tab="students" class="admin-tab-btn px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">
+            4. Student Directory (346)
+          </button>
+        </div>
+      </div>
+
+      <!-- Admin Tab 1: Complete Slot & Booking Control (Any date from Nov 1st) -->
+      <div id="adminPanelBookings" class="space-y-5">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-4">
+          <div class="flex flex-wrap items-center gap-3">
+            <label for="adminDateInput" class="text-xs font-semibold text-slate-600">Inspect Date (from Nov 1):</label>
+            <input id="adminDateInput" type="date" min="2026-11-01" value="2026-11-12"
+              class="rounded-xl border border-slate-300 px-3 py-1.5 text-xs font-semibold" />
+            <select id="adminFloorFilter" class="rounded-xl border border-slate-300 px-3 py-1.5 text-xs font-semibold">
+              <option value="ALL">All Floors (0–3)</option>
+              <option value="0">Floor 0</option>
+              <option value="1">Floor 1</option>
+              <option value="2">Floor 2</option>
+              <option value="3">Floor 3</option>
+            </select>
+          </div>
+          <div class="text-xs text-slate-500">
+            Click any <strong>Free</strong> slot to assign a student, or click any <strong>Booked</strong> slot to inspect full details, mark check-in, or cancel/override.
+          </div>
+        </div>
+
+        <!-- Admin All Active Bookings Table -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-slate-900">Active Bookings Log (Full Student Contact &amp; Check-In Status)</h3>
+            <span id="adminTotalBookingsBadge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700"></span>
+          </div>
+          <div class="overflow-x-auto custom-scroll">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-slate-200 text-slate-500 uppercase">
+                  <th class="py-2.5 px-3">Date &amp; Slot</th>
+                  <th class="py-2.5 px-3">Machine</th>
+                  <th class="py-2.5 px-3">Student (Roll &amp; Name)</th>
+                  <th class="py-2.5 px-3">Room &amp; Phone</th>
+                  <th class="py-2.5 px-3">Check-In (+5m)</th>
+                  <th class="py-2.5 px-3 text-right">Admin Action</th>
+                </tr>
+              </thead>
+              <tbody id="adminBookingsTableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Admin Visual Slot Grid -->
+        <div id="adminMachinesGrid" class="space-y-4"></div>
+      </div>
+
+      <!-- Admin Tab 2: Machine Health & Cycle Time Controls -->
+      <div id="adminPanelMachines" class="hidden space-y-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 class="text-base font-bold text-slate-900">Narmada Washing Machine Fleet (19 Active Machines)</h3>
+              <p class="text-xs text-slate-500">
+                Toggling a machine to <strong>Sick</strong> hides its slots from students and automatically releases any upcoming bookings on that machine so affected students can rebook elsewhere.
+              </p>
+            </div>
+            <span class="text-xs text-slate-400">Ignored (0 machines): RR8, RR14, RR20</span>
+          </div>
+
+          <div id="adminFleetCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+      </div>
+
+      <!-- Admin Tab 3: Complaints Management -->
+      <div id="adminPanelComplaints" class="hidden space-y-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
+          <h3 class="text-base font-bold text-slate-900">Resident Maintenance &amp; Complaint Tickets</h3>
+          <div id="adminComplaintsContainer" class="space-y-3"></div>
+        </div>
+      </div>
+
+      <!-- Admin Tab 4: Student Directory (346 Residents) & Password Reset -->
+      <div id="adminPanelStudents" class="hidden space-y-5">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Add / Edit Student Form -->
+          <div class="lg:col-span-4 bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-3.5 h-fit">
+            <h3 class="text-sm font-bold text-slate-900">Add or Update Narmada Resident</h3>
+            <p class="text-xs text-slate-500">Manage student records directly from the website without opening the Google Sheet.</p>
+            <div>
+              <label for="admStuRoll" class="block text-xs font-semibold text-slate-700 mb-1">Roll Number</label>
+              <input id="admStuRoll" type="text" placeholder="e.g. CS23B006" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs uppercase" />
+            </div>
+            <div>
+              <label for="admStuName" class="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
+              <input id="admStuName" type="text" placeholder="Student Name" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+            </div>
+            <div class="grid grid-cols-2 gap-2.5">
+              <div>
+                <label for="admStuRoom" class="block text-xs font-semibold text-slate-700 mb-1">Room No</label>
+                <input id="admStuRoom" type="number" placeholder="102" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+              </div>
+              <div>
+                <label for="admStuProgram" class="block text-xs font-semibold text-slate-700 mb-1">Program</label>
+                <input id="admStuProgram" type="text" placeholder="B.Tech-23" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2.5">
+              <div>
+                <label for="admStuPhone" class="block text-xs font-semibold text-slate-700 mb-1">Phone Number</label>
+                <input id="admStuPhone" type="tel" placeholder="9876543210" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+              </div>
+              <div>
+                <label for="admStuEmail" class="block text-xs font-semibold text-slate-700 mb-1">Email</label>
+                <input id="admStuEmail" type="email" placeholder="student@smail.iitm.ac.in" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+              </div>
+            </div>
+            <button id="btnAdminSaveStudent" type="button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-xl text-xs transition">
+              Save Resident Record
+            </button>
+          </div>
+
+          <!-- Searchable 346 Student Table -->
+          <div class="lg:col-span-8 bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h3 class="text-sm font-bold text-slate-900">Narmada Room Allocation Directory (<span id="stuCountLabel">346</span>)</h3>
+              <input id="inputSearchStudents" type="text" placeholder="Search by Roll No, Name, or Room..."
+                class="rounded-xl border border-slate-300 px-3 py-1.5 text-xs w-64" />
+            </div>
+
+            <div class="overflow-x-auto max-h-96 custom-scroll border border-slate-100 rounded-xl">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead class="bg-slate-50 sticky top-0 border-b border-slate-200 text-slate-500">
+                  <tr>
+                    <th class="py-2 px-3">Room</th>
+                    <th class="py-2 px-3">Roll No</th>
+                    <th class="py-2 px-3">Name</th>
+                    <th class="py-2 px-3">Program</th>
+                    <th class="py-2 px-3">Phone</th>
+                    <th class="py-2 px-3">PW Set</th>
+                    <th class="py-2 px-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="adminStudentsTableBody" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==================== MODAL 1: GOOGLE SHEET WEB APP URL SYNC ==================== -->
+  <div id="modalSync" class="fixed inset-0 bg-slate-900/60 z-40 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl border border-slate-200">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-slate-900">Connect Google Sheet Web App Backend</h3>
+        <button id="btnCloseSyncModal" type="button" class="text-slate-400 hover:text-slate-600 text-sm font-bold px-2 py-1">✕</button>
+      </div>
+      <p class="text-xs text-slate-600 leading-relaxed">
+        This portal comes pre-loaded with all <strong>346 Narmada students</strong> and <strong>19 washing machines</strong> so you can test every workflow immediately. To sync live across all hostel devices via your Google Sheet, paste your deployed Google Apps Script Web App URL (<code class="font-mono text-slate-800">Code.gs</code>) below:
+      </p>
+      <div>
+        <label for="inputScriptUrl" class="block text-xs font-semibold text-slate-700 mb-1">Google Apps Script Web App URL (<code class="font-mono">/exec</code>)</label>
+        <input id="inputScriptUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec"
+          class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-xs font-mono" />
+      </div>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button id="btnResetDemoData" type="button" class="px-3 py-2 rounded-xl text-xs font-medium text-rose-600 hover:bg-rose-50">
+          Reset Demo State
+        </button>
+        <button id="btnSaveScriptUrl" type="button" class="px-4 py-2 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white">
+          Save &amp; Sync
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 2: ADMIN ASSIGN / INSPECT SLOT ==================== -->
+  <div id="modalAdminSlot" class="fixed inset-0 bg-slate-900/60 z-40 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl border border-slate-200">
+      <div class="flex items-center justify-between">
+        <h3 id="modalAdminSlotTitle" class="text-base font-bold text-slate-900">Manage Slot</h3>
+        <button id="btnCloseAdminSlotModal" type="button" class="text-slate-400 hover:text-slate-600 text-sm font-bold px-2 py-1">✕</button>
+      </div>
+      <div id="modalAdminSlotBody" class="space-y-3 text-xs text-slate-700"></div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // GROUNDED DATA FROM WASHING MACHINE.XLSX (346 STUDENTS, 19 ACTIVE MACHINES)
+    // =========================================================================
+    const INITIAL_STUDENTS = [{"roomNo": 102, "rollNo": "HS22H059", "name": "Anubhav Agarwal", "gender": "Male", "course": "MA", "program": "MA-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 103, "rollNo": "HS22H007", "name": "Aditya Archi", "gender": "Male", "course": "MA", "program": "MA-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 104, "rollNo": "HS22H023", "name": "Edward Daimary", "gender": "Male", "course": "MA", "program": "MA-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 105, "rollNo": "HS22H046", "name": "Rohit", "gender": "Male", "course": "MA", "program": "MA-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 106, "rollNo": "CH22B049", "name": "Adithyan D S", "gender": "Male", "course": "DD", "program": "DD-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 107, "rollNo": "HS22H030", "name": "Kinshuk Kandpal", "gender": "Male", "course": "MA", "program": "MA-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 108, "rollNo": "MM23B012", "name": "Aarya Nisith Mehta", "gender": "Male", "course": "DD", "program": "DD-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 109, "rollNo": "MM23B077", "name": "Aryamann Kothari", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 110, "rollNo": "MM23B011", "name": "Vishwesh J", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 111, "rollNo": "MM23B050", "name": "Menon Karthik Rakesh", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 112, "rollNo": "MM23B048", "name": "Krishnarjun J", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 113, "rollNo": "MM23B068", "name": "Vasanthakumar P", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 114, "rollNo": "MM23B038", "name": "Arava Jaswanth", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 115, "rollNo": "MM23B029", "name": "Sharan", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 117, "rollNo": "MM23B023", "name": "Kanishk Sagar", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 118, "rollNo": "MM23B042", "name": "Dharavathu Toshan Sai Naik", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 119, "rollNo": "MM23B054", "name": "Paithankar Atharva Prakash", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 120, "rollNo": "AE24B036", "name": "Korlam Venkata Sai Karthik", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 121, "rollNo": "AE24B105", "name": "Narren Singh S", "gender": "Male", "course": "DD", "program": "DD-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 122, "rollNo": "AE24B053", "name": "Varanasy Nikhil", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 123, "rollNo": "CH22B046", "name": "Abhinandan Jain", "gender": "Male", "course": "DD", "program": "DD-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 124, "rollNo": "MM23B047", "name": "Krishna Attrey", "gender": "Male", "course": "DD", "program": "DD-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 125, "rollNo": "AE24B010", "name": "Jadhav Vedant Dattatray", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 126, "rollNo": "MM23B058", "name": "Raghav A", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 127, "rollNo": "MM23B079", "name": "Panshul Humad", "gender": "Male", "course": "DD", "program": "DD-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 128, "rollNo": "AE24B106", "name": "P N Nuthan Reddy", "gender": "Male", "course": "DD", "program": "DD-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 129, "rollNo": "AE24B049", "name": "Raghav Adiki", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 130, "rollNo": "AE24B103", "name": "Gaganram P M", "gender": "Male", "course": "DD", "program": "DD-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 131, "rollNo": "AE24B102", "name": "Eshwaranath", "gender": "Male", "course": "DD", "program": "DD-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 134, "rollNo": "CS23B006", "name": "Amruthapudi Mourya Nandan", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 135, "rollNo": "AE24B040", "name": "Mukeshwaran V", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 136, "rollNo": "AE24B006", "name": "Dhanurdeet Hembram", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 137, "rollNo": "AE24B003", "name": "Besta Thrilochan", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 138, "rollNo": "AE24B001", "name": "Albert Jude Reji", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 139, "rollNo": "AE24B008", "name": "Gauransh Vats", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 140, "rollNo": "AE24B017", "name": "Parthasarathy C", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 141, "rollNo": "HS22H026", "name": "Kasibhatta Rama Krishna Akhil", "gender": "Male", "course": "MA", "program": "MA-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 142, "rollNo": "HS22H017", "name": "Behjad Yasar", "gender": "Male", "course": "MA", "program": "MA-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 143, "rollNo": "HS22H043", "name": "Pranay Kumar", "gender": "Male", "course": "MA", "program": "MA-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 144, "rollNo": "HS22H028", "name": "Kaushik Raja P", "gender": "Male", "course": "MA", "program": "MA-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 145, "rollNo": "HS22H004", "name": "Abhishek P T", "gender": "Male", "course": "MA", "program": "MA-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 146, "rollNo": "HS22H011", "name": "Alfid K Khader", "gender": "Male", "course": "MA", "program": "MA-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 147, "rollNo": "CS23B022", "name": "Gundupalli Rahul Joseph", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 148, "rollNo": "CS23B087", "name": "Voggu Paardheev Kumar", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 149, "rollNo": "CS23B070", "name": "Banoth Bharath Kumar", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 150, "rollNo": "HS22H019", "name": "Chenni Valavan M", "gender": "Male", "course": "MA", "program": "MA-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 151, "rollNo": "CS23B076", "name": "Varanasi Deepesh", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 152, "rollNo": "CS23B080", "name": "Bathini Vignan Srikesh", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 153, "rollNo": "CS23B036", "name": "Midamaneni Sri Vignesh", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 154, "rollNo": "CS23B048", "name": "Pallepogu Rishi", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 155, "rollNo": "CS23B011", "name": "Bandi Rithesh Kumar Reddy", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 156, "rollNo": "CS23B012", "name": "Banoth Paandu", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 157, "rollNo": "CS23B041", "name": "Nadella Mohith Sai", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 158, "rollNo": "CS23B043", "name": "Nali Vivek Vardhan", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 159, "rollNo": "CS23B066", "name": "Yanadi Bharath", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 160, "rollNo": "CS23B050", "name": "Peddinti Sri Balaji Abhishek", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 161, "rollNo": "CS23B073", "name": "Tallapaneni Subhash Ram", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 162, "rollNo": "CS23B067", "name": "Yemireddy Rama Manoj Kumar Reddy", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 163, "rollNo": "CS23B065", "name": "Veliginti Ajay Kumar Reddy", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 201, "rollNo": "CS23B100", "name": "Aadi Srivastava", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 202, "rollNo": "CS23B008", "name": "Arya Krishnamurthy", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 203, "rollNo": "CS23B072", "name": "Parva Satodia", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 204, "rollNo": "CS23B005", "name": "Allu Varunkoushik", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 205, "rollNo": "CS23B083", "name": "Mikhil C", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 206, "rollNo": "CS23B060", "name": "Singaraju Venkat Koundinya", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 207, "rollNo": "CS23B063", "name": "Suraj Gurunath Kagalkar", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 208, "rollNo": "CS23B096", "name": "Atharva Moghe", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 209, "rollNo": "CS23B002", "name": "Adithya Kaushik", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 210, "rollNo": "CS23B098", "name": "Siddharth S George", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 211, "rollNo": "CS23B004", "name": "Advik Kabra", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 212, "rollNo": "MM23B066", "name": "Sriprakash T", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 213, "rollNo": "MM23B034", "name": "Aditya Arvind", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 214, "rollNo": "CS23B097", "name": "Deepanjan Das", "gender": "Male", "course": "DD", "program": "DD-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 215, "rollNo": "MM23B030", "name": "Abhinandha Sriram", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 216, "rollNo": "MM23B032", "name": "Adithya Muthukumaran", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 217, "rollNo": "CS23B003", "name": "Aditya Anand Sawant", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 218, "rollNo": "CS23B099", "name": "Ashish Cherian Thannickal", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 219, "rollNo": "CS23B078", "name": "Ventrapragada Krishna Sameer", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 220, "rollNo": "CS23B001", "name": "Abhiraj Sanjay Ghumare", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 221, "rollNo": "CS23B020", "name": "Gawai Abhishek Ashish", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 222, "rollNo": "CS23B101", "name": "Ajoy Mathew", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 223, "rollNo": "CS23B068", "name": "Yoogi Kovendhan", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 224, "rollNo": "CS23B044", "name": "Nandha Gopi Krishna N", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 225, "rollNo": "HS22H058", "name": "Vinayak B S", "gender": "Male", "course": "MA", "program": "MA-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 226, "rollNo": "HS22H080", "name": "Boggula Ajitesh Reddy", "gender": "Male", "course": "MA", "program": "MA-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 227, "rollNo": "CH22B080", "name": "Mohd Fuzail", "gender": "Male", "course": "DD", "program": "DD-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 228, "rollNo": "CH22B087", "name": "Priyanshu Verma", "gender": "Male", "course": "DD", "program": "DD-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 229, "rollNo": "MM23B046", "name": "Kishor Kumar Dhruw", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 230, "rollNo": "MM23B059", "name": "Raju Rahul Raj", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 231, "rollNo": "CS23B010", "name": "Balla Surya Harshith", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 232, "rollNo": "MM23B028", "name": "Sahil", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 233, "rollNo": "CH24B019", "name": "Raagul Khanna K", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 234, "rollNo": "CH24B026", "name": "P Adithya", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 235, "rollNo": "CH24B102", "name": "Suraj Kumar Singh", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 236, "rollNo": "CH24B060", "name": "V Harshedh", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 237, "rollNo": "CH24B005", "name": "Dev Akhilesh Ram L A", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 238, "rollNo": "CH24B104", "name": "S V Tamilselvan", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 239, "rollNo": "CH24B069", "name": "Mohammad Tausif", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 240, "rollNo": "CH24B032", "name": "S Alfie Joshua Paul", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 241, "rollNo": "CH24B103", "name": "Swaraj Das", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 242, "rollNo": "CH24B070", "name": "Muhammed Dilshad M P", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 243, "rollNo": "CH24B071", "name": "K S Naghul Pranav", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 244, "rollNo": "CH24B002", "name": "Athul Narayan", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 245, "rollNo": "CH24B058", "name": "Harith T", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 246, "rollNo": "CH24B008", "name": "K Dharunanand", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 247, "rollNo": "CH24B085", "name": "Prathiv V", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 248, "rollNo": "CH24B083", "name": "Prakhar Shekhawat", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 249, "rollNo": "AE24B046", "name": "Patil Raj Sanjay", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 250, "rollNo": "AE24B045", "name": "Patel Parth Ketankumar", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 251, "rollNo": "AE24B038", "name": "Manukrishnan P", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 252, "rollNo": "AE24B048", "name": "B Pradyumnan", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 253, "rollNo": "AE24B108", "name": "Navaneeth Janardhanan Suraj", "gender": "Male", "course": "DD", "program": "DD-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 254, "rollNo": "AE24B041", "name": "H Murali Krishnan", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 255, "rollNo": "CS23B081", "name": "Cheripelly Karthik", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 256, "rollNo": "CS23B047", "name": "Paleru Yaswanth Srinivas", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 257, "rollNo": "CS23B059", "name": "Manvith Reddy", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 258, "rollNo": "CS23B045", "name": "Nandyala Prince Branham Reddy", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 259, "rollNo": "CS23B056", "name": "Sailada Yeswanth", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 260, "rollNo": "CS23B024", "name": "Gunti Murali Krishna", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 261, "rollNo": "CS23B046", "name": "Nimmakayala Dharma Teja Reddy", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 262, "rollNo": "CS23B014", "name": "Basa Venkata Sai Sharmil Kumar", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 263, "rollNo": "CS23B007", "name": "Annaji Sai Dheeraj", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 264, "rollNo": "CS23B029", "name": "Kanithi Sri Karthik", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 265, "rollNo": "AE24B023", "name": "Shaurya Gupta", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 265, "rollNo": "AE24B024", "name": "Tharunvarma R", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 266, "rollNo": "AE24B016", "name": "Naief Ryan Ashraf", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 266, "rollNo": "AE24B027", "name": "Aathreya Nandana", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 267, "rollNo": "AE24B004", "name": "Charan Rohit G J", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 267, "rollNo": "AE24B110", "name": "Tejasv Tanmay Yadav", "gender": "Male", "course": "DD", "program": "DD-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 268, "rollNo": "AE24B037", "name": "Lonpande Vinay Narendra", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 268, "rollNo": "CH24B096", "name": "Satyam Sanjay Vishwas", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 269, "rollNo": "CH24B089", "name": "Ramisetti Chandra Sidharth", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 269, "rollNo": "CH24B088", "name": "Rakesh Jorwal", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 272, "rollNo": "CS23B062", "name": "Srivats Ramanujan", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 272, "rollNo": "CS23B064", "name": "Tushar Jain", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 273, "rollNo": "CS23B069", "name": "Yukash Ram E", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 273, "rollNo": "CS23B049", "name": "Parijat Mukherjee", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 274, "rollNo": "CS23B054", "name": "Reuben Lawrence", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 274, "rollNo": "CS23B055", "name": "Rushiraj Shekhar Ralebhat", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 301, "rollNo": "CH24B067", "name": "Mali Jay", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 302, "rollNo": "CH24B013", "name": "Muchak Aditya Kalyan", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 303, "rollNo": "CH24B062", "name": "Jishnu Majumdar", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 304, "rollNo": "CH24B053", "name": "Deepak", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 305, "rollNo": "CH24B068", "name": "Mayank Singh", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 306, "rollNo": "CH24B077", "name": "Nitin Kumar", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 307, "rollNo": "CH24B065", "name": "Kunal Dilip Rakhecha", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 308, "rollNo": "CH24B081", "name": "Pandey Animesh Atul", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 309, "rollNo": "CH24B078", "name": "Ojas Patil", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 310, "rollNo": "CH24B076", "name": "Nipurn Khetan", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 311, "rollNo": "CH24B075", "name": "Niphade Sarthak Navnath", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 312, "rollNo": "CH24B095", "name": "Sarvesh Dattatray Pasare", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 313, "rollNo": "CH24B091", "name": "Rishabh Singh", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 314, "rollNo": "CH24B084", "name": "Pramod Kumar Mahato", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 315, "rollNo": "CH24B101", "name": "Supash", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 316, "rollNo": "CH24B099", "name": "Shyam Anand", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 317, "rollNo": "CH24B055", "name": "Divyansh Jeengar", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 318, "rollNo": "CH24B052", "name": "Darsheel Sharma", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 319, "rollNo": "CH24B038", "name": "Anwesh Dwivedy", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 320, "rollNo": "CH24B033", "name": "Amber Srivastava", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 321, "rollNo": "CH24B036", "name": "Anirudh Sharma", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 322, "rollNo": "CH24B037", "name": "Anshul Diwakar Godbole", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 323, "rollNo": "CH24B046", "name": "Bivesh Kumar Dalai", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 324, "rollNo": "CH24B039", "name": "Armman Roy", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 325, "rollNo": "CH24B034", "name": "Aniket Praveen Pai", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 326, "rollNo": "CH24B028", "name": "Ajeya P", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 327, "rollNo": "CH24B044", "name": "Bhardwaj Kannan", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 328, "rollNo": "CH24B025", "name": "Abhinav Madyastha K", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 329, "rollNo": "CH24B057", "name": "Gurukiran Kumar", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 330, "rollNo": "CH24B035", "name": "Anirudh Narayanan", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 331, "rollNo": "CH24B006", "name": "R Dhaksesh", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 332, "rollNo": "CH24B004", "name": "Daksh Nathani", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 333, "rollNo": "MS25A007", "name": "Ahmed Hossain", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 334, "rollNo": "MS25A052", "name": "Pourab Roy", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 335, "rollNo": "MS25A061", "name": "Shashank Mishra", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 336, "rollNo": "MS25A070", "name": "Tejas Ratan Nikam", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 337, "rollNo": "MS25A020", "name": "Burla Harshith Reddy", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 338, "rollNo": "MS25A012", "name": "Anuj Prakash Gupta", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 339, "rollNo": "MS25A083", "name": "Nesan Antony J S", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 340, "rollNo": "MM23B020", "name": "Ayush Nama", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 341, "rollNo": "MM23B010", "name": "Vihan Darshan Shah", "gender": "Male", "course": "DD", "program": "DD-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 342, "rollNo": "MM23B004", "name": "Chintala Mahith", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 343, "rollNo": "MM23B003", "name": "Bhuvanesh B M", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 344, "rollNo": "MM23B008", "name": "Sameer D Nadig", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 345, "rollNo": "MM23B001", "name": "Ankith C S", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 346, "rollNo": "MM23B009", "name": "Vakati Venkata Akshit", "gender": "Male", "course": "DD", "program": "DD-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 347, "rollNo": "MM23B005", "name": "Mukunthan S M", "gender": "Male", "course": "DD", "program": "DD-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 348, "rollNo": "MM23B002", "name": "Ayush Adarsh", "gender": "Male", "course": "DD", "program": "DD-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 349, "rollNo": "CH24B093", "name": "Samarth Sneh", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 350, "rollNo": "HS22H003", "name": "Abhineet Raghuram Komanduri", "gender": "Male", "course": "MA", "program": "MA-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 352, "rollNo": "HS22H056", "name": "Swapnaneel Dan", "gender": "Male", "course": "MA", "program": "MA-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 353, "rollNo": "HS22H005", "name": "Adithya Thej A", "gender": "Male", "course": "MA", "program": "MA-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 354, "rollNo": "MS25A072", "name": "Kolla Tejender Reddy", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 355, "rollNo": "MS25A008", "name": "Akash V", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 356, "rollNo": "MS25A060", "name": "Senthil Vinod S", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 357, "rollNo": "MS25A045", "name": "Misfer M", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 358, "rollNo": "MS25A006", "name": "Aditya Raj", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 359, "rollNo": "MS25A056", "name": "Raghupatruni Shashank", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 360, "rollNo": "HS22H071", "name": "Satyala Santosh", "gender": "Male", "course": "MA", "program": "MA-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 361, "rollNo": "MS25A017", "name": "Arvaj Salmani", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 362, "rollNo": "HS22H009", "name": "Akhil Faizal", "gender": "Male", "course": "MA", "program": "MA-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 363, "rollNo": "MS25A076", "name": "Vivek A", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 364, "rollNo": "HS22H073", "name": "Soumajit Paul", "gender": "Male", "course": "MA", "program": "MA-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 365, "rollNo": "CH24B020", "name": "Ragunandhaan S", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 365, "rollNo": "AE24B021", "name": "L Sai Rupesh", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 366, "rollNo": "CH24B017", "name": "Om Atul Dhomne", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 366, "rollNo": "CH24B087", "name": "Prithee Raj Daimary", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 367, "rollNo": "CH24B092", "name": "Sagnik Chakrabarty", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 367, "rollNo": "CH24B022", "name": "Swapnil Mandal", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 368, "rollNo": "CH24B018", "name": "Pritiman Bala", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 368, "rollNo": "AE24B043", "name": "Nikhil Velari", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 369, "rollNo": "CH22B008", "name": "Aayush Bhakna", "gender": "Male", "course": "DD", "program": "DD-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 369, "rollNo": "CH22B020", "name": "Deepanjhan Das", "gender": "Male", "course": "DD", "program": "DD-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 370, "rollNo": "CH24B074", "name": "Nilav Sarkar", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 370, "rollNo": "CS23B058", "name": "Shivanshu Kumar", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 372, "rollNo": "CH24B041", "name": "S Ashwanth Balaji", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 372, "rollNo": "CH24B059", "name": "Harsh Luniya", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 373, "rollNo": "ED22B045", "name": "Bhupesh Kumar Bamboria", "gender": "Male", "course": "DD", "program": "DD-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 373, "rollNo": "ED22B068", "name": "Shubhankit Tewari", "gender": "Male", "course": "DD", "program": "DD-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 374, "rollNo": "ED22B018", "name": "Kale Varun Vivek", "gender": "Male", "course": "DD", "program": "DD-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 374, "rollNo": "ED22B058", "name": "Parth Raosaheb Shinde", "gender": "Male", "course": "DD", "program": "DD-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 401, "rollNo": "CS23B074", "name": "Baindla Satwik", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 402, "rollNo": "CS23B017", "name": "Dungavath Yashwanth Naik", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 403, "rollNo": "AE24B044", "name": "Owais Bashir Khan", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 404, "rollNo": "MS25A059", "name": "Samarth Vijaykumar Satpute", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 405, "rollNo": "MS25A024", "name": "Chandan Singh", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 406, "rollNo": "MS25A010", "name": "Patel Ankit Rohitbhai", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 407, "rollNo": "MS25A082", "name": "Velmurugan M", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 408, "rollNo": "MS25A057", "name": "Rishabh Pandey", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 409, "rollNo": "MS25A047", "name": "Mohnish Saini", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 410, "rollNo": "MS25A026", "name": "Deepansh Jain", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 411, "rollNo": "MS25A001", "name": "Abhinav Rastogi", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 412, "rollNo": "MS25A023", "name": "Chaitanya Prashant Talokar", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 413, "rollNo": "MS25A077", "name": "Yashpal Killol Momaya", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 414, "rollNo": "MS25A037", "name": "Kishlay Kinjal", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 415, "rollNo": "MS25A005", "name": "Aditya Pradeep Mirji", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 416, "rollNo": "MS25A058", "name": "B Sai Kalyan", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 417, "rollNo": "AE24B052", "name": "Suryanshu Kumar", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 418, "rollNo": "CH24B063", "name": "Kaniyamuthan S", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 419, "rollNo": "CH24B098", "name": "Shreyas Kulkarni", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 420, "rollNo": "CH24B105", "name": "Tanuj Sipani", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 421, "rollNo": "CH24B108", "name": "Vedant Misra", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 422, "rollNo": "CH24B100", "name": "Sparsh Bandi", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 423, "rollNo": "AE24B042", "name": "Neeraj R", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 424, "rollNo": "CH24B027", "name": "Agnibho Guru", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 425, "rollNo": "AE24B054", "name": "Vedant Mukund Mudras", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 426, "rollNo": "MM23B053", "name": "Nenavath Shiva", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 427, "rollNo": "CH24B049", "name": "Chinmay Milind Mainkar", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 428, "rollNo": "CH24B050", "name": "Daksh Agarwal", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 429, "rollNo": "CH24B040", "name": "Aryan Jain", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 430, "rollNo": "CH24B030", "name": "Akshat Daga", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 431, "rollNo": "AE24B022", "name": "Saksham Maheshwari", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 432, "rollNo": "AE24B026", "name": "Vismay Shah", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 433, "rollNo": "MS25A062", "name": "Siddhartha Gaba", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 434, "rollNo": "CS23B075", "name": "Ramavath Rahul Rathod", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 435, "rollNo": "MS25A021", "name": "C R Narasimha Krishna Sai", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 436, "rollNo": "MS25A029", "name": "Hardik Patel", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 437, "rollNo": "MS25A004", "name": "Abhishek Jayara", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 438, "rollNo": "MS25A042", "name": "Maddala Prudhvi Tej", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 439, "rollNo": "MS25A071", "name": "Tejasv Singh", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 440, "rollNo": "CS23B071", "name": "Goda Nasar Varshith", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 441, "rollNo": "MS25A015", "name": "Arnav Gupta", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 442, "rollNo": "MS25A019", "name": "Ayush Ranjan", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 443, "rollNo": "MS25A038", "name": "Lavanya Rajendra Tembhurne", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 444, "rollNo": "MS25A002", "name": "Abhinav Singh", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 445, "rollNo": "MS25A055", "name": "Priyesh Kumar", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 446, "rollNo": "MS25A030", "name": "Hariharasudhan J", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 447, "rollNo": "MS25A031", "name": "Hrithik Chowdhry", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 448, "rollNo": "MS25A049", "name": "Nakul Deshmukh", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 449, "rollNo": "MM23B027", "name": "Rakesh Madiga", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 450, "rollNo": "MS25A043", "name": "Mathi B N", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 451, "rollNo": "MS25A065", "name": "Sriram Am", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 452, "rollNo": "MM23B056", "name": "Paras Garg", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 453, "rollNo": "MS25A041", "name": "Mohamed Kasim Raja M", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 454, "rollNo": "MS25A046", "name": "Mohammed Ashik S", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 455, "rollNo": "MS25A034", "name": "K J Vishaal", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 456, "rollNo": "MS25A073", "name": "Trivedhan Sivaprakash", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 457, "rollNo": "CS23B013", "name": "Banothu Anvesh", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 458, "rollNo": "MS25A013", "name": "Aravind V S", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 459, "rollNo": "MS25A014", "name": "Arjun V", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 460, "rollNo": "MS25A022", "name": "C V Sreeram", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 461, "rollNo": "MS25A033", "name": "John Glen Mynatty", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 462, "rollNo": "MS25A035", "name": "Karthik Suresh", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 463, "rollNo": "MS25A048", "name": "Muhammed Thanveer K K", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 464, "rollNo": "MS25A074", "name": "V Shankar Raman", "gender": "Male", "course": "MBA", "program": "MBA-25", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 1001, "rollNo": "CS23B040", "name": "Mukhesh Revathi Muneeswaran", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 1002, "rollNo": "CS23B037", "name": "Mithun.V", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 1003, "rollNo": "CS23B038", "name": "Modem Manoj Varma", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 1004, "rollNo": "CS23B034", "name": "Marepalli Pranav", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 1005, "rollNo": "CS23B019", "name": "Eraganaboina Abhilash", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 1006, "rollNo": "CS23B042", "name": "Nadipalli Siddardha", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 1007, "rollNo": "CS23B016", "name": "Duggirala Yashaswi", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 1008, "rollNo": "CS23B025", "name": "Hanumanthu Nithin", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 1011, "rollNo": "CS23B035", "name": "Medapuram Lakshminarasimha Madhav Bhardwaj", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 1012, "rollNo": "CS23B027", "name": "Kallakuri Sainadh Srimanth", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 1013, "rollNo": "CS23B018", "name": "Edubilli Karthik", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 1014, "rollNo": "CS23B033", "name": "Malineni Datha Rishyanth", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 1015, "rollNo": "CS23B086", "name": "Ved Prakash Dhaka", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 1016, "rollNo": "CS23B021", "name": "Gollapalli Sunisith Sagar", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 2001, "rollNo": "MM23B044", "name": "Jeremy Scaria", "gender": "Male", "course": "DD", "program": "DD-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 2002, "rollNo": "MM23B039", "name": "Charudev S N", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 2003, "rollNo": "MM23B061", "name": "Sangati Lakshmi Narasimha Venkata Sairam", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 2004, "rollNo": "MM23B057", "name": "Payidiparty Ganesha Sri Sai Shanmukh", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 2005, "rollNo": "MM23B026", "name": "Pilla Srinivas", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 2006, "rollNo": "MM23B021", "name": "Jayyasimha Poushik", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 2007, "rollNo": "MM23B076", "name": "Yaski Sriharshith", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 2008, "rollNo": "MM23B024", "name": "Mena Pranav Kumar", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 2009, "rollNo": "MM23B017", "name": "Rohith Vishva G", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 2010, "rollNo": "MM23B043", "name": "Dhisanth K S", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 2011, "rollNo": "MM23B025", "name": "Mithun Vasan N", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 2012, "rollNo": "MM23B041", "name": "Deva Shankar Jiji Pillai", "gender": "Male", "course": "DD", "program": "DD-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 2013, "rollNo": "HS22H029", "name": "Kethavath Anjaneyulu", "gender": "Male", "course": "MA", "program": "MA-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 2014, "rollNo": "MM23B049", "name": "Manyam Srivallabh", "gender": "Male", "course": "DD", "program": "DD-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 2015, "rollNo": "MM23B022", "name": "Kaarthik N", "gender": "Male", "course": "B.Tech", "program": "B.Tech-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 2016, "rollNo": "MM23B052", "name": "Mohamed Fawaz M", "gender": "Male", "course": "DD", "program": "DD-23", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 3001, "rollNo": "CH24B011", "name": "Maloth Ram", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 3002, "rollNo": "CH24B014", "name": "Mudapaka Yeswanth", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 3003, "rollNo": "CH24B080", "name": "Paluvuri Siddartha", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 3004, "rollNo": "CH24B012", "name": "Maradana Sai Srikar", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 3005, "rollNo": "CH24B106", "name": "Tejavath Shiva Kamal Naik", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 3006, "rollNo": "CH22B007", "name": "Ojas Ramchandra Phadake", "gender": "Male", "course": "DD", "program": "DD-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 3007, "rollNo": "CH24B003", "name": "Chatty Venkata Sai Pranesh", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 3008, "rollNo": "CH24B021", "name": "Sai Shashank Tati", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 3009, "rollNo": "CH24B047", "name": "Changarpallu Vinay Prasad", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 3010, "rollNo": "CH24B024", "name": "Vemuri Navadeep", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 3011, "rollNo": "CH24B031", "name": "Aleti Dhanush", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 3012, "rollNo": "CH24B042", "name": "Bandla Sai Venkata Durgesh", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 3013, "rollNo": "CH24B043", "name": "Banoth Chandulal", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 3014, "rollNo": "CH24B048", "name": "Chilaka Vineeth Vardhan", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 3015, "rollNo": "CH24B051", "name": "Daravath Nithin", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 3016, "rollNo": "CH24B109", "name": "Vemula Nagesh Kumar", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 4001, "rollNo": "AE24B018", "name": "Peddagolla Mahanthi", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 4002, "rollNo": "AE24B035", "name": "Jadi Revanth", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 4003, "rollNo": "AE24B032", "name": "Chikoti Parthiv", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 4004, "rollNo": "AE24B030", "name": "K Balajisai", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 4005, "rollNo": "AE24B028", "name": "Akhand Veer Garg", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 4006, "rollNo": "CH22B002", "name": "Ganesh B", "gender": "Male", "course": "DD", "program": "DD-22", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 4007, "rollNo": "AE24B051", "name": "V Sanjesh", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 4008, "rollNo": "AE24B055", "name": "Yenugula Veera Vardhan", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 4009, "rollNo": "AE24B039", "name": "Meghavath Raviteja", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 4010, "rollNo": "CH24B016", "name": "Nageswara Vishwanth Srikakollu", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 4011, "rollNo": "AE24B019", "name": "Ramavath Jagan Naik", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 4012, "rollNo": "AE24B009", "name": "Gobburi D L N Eshwar Chandra Prakash", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 4013, "rollNo": "AE24B014", "name": "Manchikanti Mohanth", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 4014, "rollNo": "AE24B013", "name": "Loddi Girija Sankar", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 4015, "rollNo": "AE24B005", "name": "Dasari Karthik", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}, {"roomNo": 4016, "rollNo": "AE24B031", "name": "Balam Sai Durga Mahesh", "gender": "Male", "course": "B.Tech", "program": "B.Tech-24", "passwordUpdated": false, "passwordHash": "", "phone": "", "email": ""}];
+    const INITIAL_MACHINES = [{"floor": 0, "id": "RR1", "cycleMins": 80, "numMachines": 1, "status": "Healthy"}, {"floor": 0, "id": "RR2", "cycleMins": 80, "numMachines": 1, "status": "Sick"}, {"floor": 0, "id": "RR4", "cycleMins": 80, "numMachines": 1, "status": "Sick"}, {"floor": 0, "id": "RR5", "cycleMins": 80, "numMachines": 1, "status": "Healthy"}, {"floor": 1, "id": "RR6", "cycleMins": 65, "numMachines": 1, "status": "Healthy"}, {"floor": 1, "id": "RR7", "cycleMins": 80, "numMachines": 1, "status": "Healthy"}, {"floor": 1, "id": "RR9", "cycleMins": 100, "numMachines": 1, "status": "Healthy"}, {"floor": 1, "id": "RR10", "cycleMins": 65, "numMachines": 1, "status": "Healthy"}, {"floor": 1, "id": "RR11", "cycleMins": 65, "numMachines": 1, "status": "Healthy"}, {"floor": 2, "id": "RR12", "cycleMins": 65, "numMachines": 1, "status": "Healthy"}, {"floor": 2, "id": "RR13", "cycleMins": 80, "numMachines": 1, "status": "Healthy"}, {"floor": 2, "id": "RR15", "cycleMins": 65, "numMachines": 1, "status": "Healthy"}, {"floor": 2, "id": "RR16", "cycleMins": 65, "numMachines": 1, "status": "Healthy"}, {"floor": 2, "id": "RR17", "cycleMins": 80, "numMachines": 1, "status": "Healthy"}, {"floor": 3, "id": "RR18", "cycleMins": 80, "numMachines": 1, "status": "Healthy"}, {"floor": 3, "id": "RR19", "cycleMins": 65, "numMachines": 1, "status": "Healthy"}, {"floor": 3, "id": "RR21", "cycleMins": 80, "numMachines": 1, "status": "Healthy"}, {"floor": 3, "id": "RR22", "cycleMins": 80, "numMachines": 1, "status": "Healthy"}, {"floor": 3, "id": "RR23", "cycleMins": 65, "numMachines": 1, "status": "Healthy"}];
+
+    // Pre-seeded sample bookings on Today (2026-11-12) so Next-Slot Privacy & Admin Log can be tested immediately
+    const TODAY_STR = "2026-11-12";
+    const TOMORROW_STR = "2026-11-13";
+
+    const INITIAL_BOOKINGS = [
+      {
+        bookingId: "BK-NARMADA-101",
+        date: TODAY_STR,
+        floor: 0,
+        machineId: "RR1",
+        slotNum: 9,
+        slotTiming: "10:40 - 12:00",
+        rollNo: "HS22H007",
+        studentName: "Aditya Archi",
+        roomNo: 103,
+        phone: "9840112233",
+        email: "hs22h007@smail.iitm.ac.in",
+        status: "ACTIVE",
+        checkedIn: true,
+        bookedAt: "2026-11-12T08:15:00"
+      },
+      {
+        bookingId: "BK-NARMADA-102",
+        date: TODAY_STR,
+        floor: 1,
+        machineId: "RR6",
+        slotNum: 11,
+        slotTiming: "10:50 - 11:55",
+        rollNo: "MM23B012",
+        studentName: "Aarya Nisith Mehta",
+        roomNo: 108,
+        phone: "9840998877",
+        email: "mm23b012@smail.iitm.ac.in",
+        status: "ACTIVE",
+        checkedIn: false,
+        bookedAt: "2026-11-12T09:00:00"
+      }
+    ];
+
+    const INITIAL_COMPLAINTS = [
+      {
+        ticketId: "CMP-NARMADA-01",
+        reportedAt: "2026-11-11 19:30",
+        rollNo: "HS22H007",
+        studentName: "Aditya Archi",
+        roomNo: 103,
+        phone: "9840112233",
+        floor: 0,
+        machineId: "RR2",
+        issueType: "Drainage / Spin Issue",
+        description: "Machine RR2 on Ground Floor is not draining water after wash cycle.",
+        status: "OPEN",
+        adminNotes: "Marked RR2 Sick in Maintenance sheet; technician scheduled."
+      },
+      {
+        ticketId: "CMP-NARMADA-02",
+        reportedAt: "2026-11-11 21:10",
+        rollNo: "HS22H023",
+        studentName: "Edward Daimary",
+        roomNo: 104,
+        phone: "9840223344",
+        floor: 0,
+        machineId: "RR4",
+        issueType: "Power / Machine Won't Start",
+        description: "RR4 display panel does not power on when plugged in.",
+        status: "OPEN",
+        adminNotes: "Marked RR4 Sick; awaiting replacement fuse."
+      }
+    ];
+
+    // =========================================================================
+    // STATE MANAGEMENT & SAFE STORAGE
+    // =========================================================================
+    const STORAGE_KEY = "narmada_laundry_portal_state_v1";
+
+    const DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwD7V6a7hGCa_Xbyu-UxZN2VxwPEj01vtUPa6HUBRYN3jHieSQZ8Ryb1Uncrx7bWPU68A/exec";
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.students) && parsed.students.length > 0) {
+            if (!parsed.scriptUrl) parsed.scriptUrl = DEFAULT_SCRIPT_URL;
+            return parsed;
+          }
+        }
+      } catch (e) {}
+      return {
+        scriptUrl: DEFAULT_SCRIPT_URL,
+        students: JSON.parse(JSON.stringify(INITIAL_STUDENTS)),
+        machines: JSON.parse(JSON.stringify(INITIAL_MACHINES)),
+        bookings: JSON.parse(JSON.stringify(INITIAL_BOOKINGS)),
+        complaints: JSON.parse(JSON.stringify(INITIAL_COMPLAINTS)),
+        adminCreds: { username: "admin", passwordHash: simpleHash("narmada2026") }
+      };
+    }
+
+    async function pullCloudState() {
+      if (!state.scriptUrl || !state.scriptUrl.startsWith("https://")) return;
+      try {
+        const role = currentUser ? currentUser.role : "student";
+        const rollNo = (currentUser && currentUser.role === "student" && currentUser.data) ? currentUser.data.rollNo : "";
+        const url = state.scriptUrl + "?action=state&role=" + encodeURIComponent(role) + "&rollNo=" + encodeURIComponent(rollNo) + "&t=" + Date.now();
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data && data.ok) {
+          if (Array.isArray(data.machines) && data.machines.length > 0) state.machines = data.machines;
+          if (Array.isArray(data.bookings)) state.bookings = data.bookings;
+          if (Array.isArray(data.complaints)) state.complaints = data.complaints;
+          if (Array.isArray(data.students) && data.students.length > 0) state.students = data.students;
+          try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+          updateOverviewCounters();
+          if (currentUser && currentUser.role === "student") renderStudentPortal();
+          if (currentUser && currentUser.role === "admin") renderAdminPortal();
+        }
+      } catch (e) {}
+    }
+
+    function saveState(syncAction = null, syncPayload = {}) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {}
+      updateOverviewCounters();
+      if (syncAction && state.scriptUrl && state.scriptUrl.startsWith("https://")) {
+        fetch(state.scriptUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(Object.assign({ action: syncAction }, syncPayload))
+        }).then(() => {
+          setTimeout(pullCloudState, 800);
+        }).catch(() => {});
+      }
+    }
+
+    let state = loadState();
+    let currentUser = null; // { role: 'student' | 'admin', data: {...} }
+    let pendingStudentSetup = null;
+    let selectedStuDate = TODAY_STR;
+    let selectedStuFloor = "ALL";
+    let activeAdminTab = "bookings";
+    let activeAdminSlotCtx = null;
+
+    // Simple deterministic SHA-256-like hex hash for client-side verification & demo parity
+    function simpleHash(str) {
+      const s = String(str).trim();
+      let h1 = 0xdeadbeef ^ s.length, h2 = 0x41c6ce57 ^ s.length;
+      for (let i = 0, ch; i < s.length; i++) {
+        ch = s.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+      }
+      h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+      h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+      return "sha256_" + (h2 >>> 0).toString(16).padStart(8, "0") + (h1 >>> 0).toString(16).padStart(8, "0");
+    }
+
+    // =========================================================================
+    // CONTINUOUS 24-HOUR SLOT MATH (65m, 80m, 100m)
+    // =========================================================================
+    function formatHHMM(totalMinutes) {
+      const h = Math.floor(totalMinutes / 60) % 24;
+      const m = totalMinutes % 60;
+      return String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0");
+    }
+
+    function generateMachineSlots(cycleMins) {
+      const slots = [];
+      let t = 0;
+      let idx = 1;
+      const dur = Math.max(15, Number(cycleMins) || 80);
+      while (t + dur <= 1440) {
+        const startStr = formatHHMM(t);
+        const endStr = (t + dur === 1440) ? "24:00" : formatHHMM(t + dur);
+        slots.push({
+          slotNum: idx,
+          startMins: t,
+          endMins: t + dur,
+          timing: startStr + " - " + endStr
+        });
+        t += dur;
+        idx++;
+      }
+      return slots;
+    }
+
+    // =========================================================================
+    // TOAST & SOUND HELPERS
+    // =========================================================================
+    function showToast(message, type = "info") {
+      const container = document.getElementById("toastContainer");
+      if (!container) return;
+      const colors = {
+        info: "bg-slate-900 text-white border-slate-700",
+        success: "bg-emerald-700 text-white border-emerald-600",
+        warn: "bg-amber-600 text-white border-amber-500",
+        error: "bg-rose-700 text-white border-rose-600"
+      };
+      const el = document.createElement("div");
+      el.className = "pointer-events-auto px-4 py-3 rounded-xl shadow-lg border text-xs font-medium flex items-center justify-between gap-3 transition " + (colors[type] || colors.info);
+      el.innerHTML = '<span>' + escapeHtml(message) + '</span>';
+      container.appendChild(el);
+      setTimeout(() => {
+        el.remove();
+      }, 4200);
+    }
+
+    function playAlertChime() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.setValueAtTime(1174.66, ctx.currentTime + 0.14);
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.45);
+      } catch (e) {}
+    }
+
+    function escapeHtml(s) {
+      return String(s || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    // =========================================================================
+    // OVERVIEW COUNTERS & INITIALIZATION
+    // =========================================================================
+    function updateOverviewCounters() {
+      let healthy = 0;
+      let sick = 0;
+      let totalSlots = 0;
+      state.machines.forEach(m => {
+        if (m.status === "Healthy") {
+          healthy++;
+          totalSlots += Math.floor(1440 / m.cycleMins);
+        } else {
+          sick++;
+        }
+      });
+      const elH = document.getElementById("statHealthyCount");
+      const elS = document.getElementById("statSickCount");
+      const elD = document.getElementById("statDailySlots");
+      if (elH) elH.textContent = String(healthy);
+      if (elS) elS.textContent = String(sick);
+      if (elD) elD.textContent = String(totalSlots);
+
+      const syncDot = document.getElementById("syncDot");
+      const syncBtnLabel = document.getElementById("syncBtnLabel");
+      if (syncDot && syncBtnLabel) {
+        if (state.scriptUrl) {
+          syncDot.className = "w-2 h-2 rounded-full bg-emerald-400";
+          syncBtnLabel.textContent = "Google Sheet Connected";
+        } else {
+          syncDot.className = "w-2 h-2 rounded-full bg-blue-400";
+          syncBtnLabel.textContent = "Connect Google Sheet";
+        }
+      }
+    }
+
+    function populateRollDatalist() {
+      const dl = document.getElementById("rollList");
+      if (!dl) return;
+      dl.innerHTML = state.students
+        .slice(0, 346)
+        .map(s => '<option value="' + escapeHtml(s.rollNo) + '">' + escapeHtml(s.name) + ' — Room ' + s.roomNo + '</option>')
+        .join("");
+    }
+
+    // =========================================================================
+    // AUTHENTICATION FLOWS (FIRST-TIME ROOM VERIFICATION + RETURNING LOGIN)
+    // =========================================================================
+    function handleCheckRollClick() {
+      const input = document.getElementById("inputStudentRoll");
+      const roll = String(input ? input.value : "").trim().toUpperCase();
+      if (!roll) {
+        showToast("Please enter your Narmada Roll Number.", "warn");
+        return;
+      }
+      const stu = state.students.find(s => s.rollNo.toUpperCase() === roll);
+      const boxSetup = document.getElementById("boxFirstTimeSetup");
+      const boxLogin = document.getElementById("boxReturningLogin");
+
+      if (!stu) {
+        boxSetup.classList.add("hidden");
+        boxLogin.classList.add("hidden");
+        showToast("Roll Number " + roll + " was not found in Narmada_Room_Allocation.", "error");
+        return;
+      }
+
+      pendingStudentSetup = stu;
+      if (!stu.passwordUpdated || !stu.passwordHash) {
+        boxLogin.classList.add("hidden");
+        boxSetup.classList.remove("hidden");
+        document.getElementById("setupStudentName").textContent = stu.name + " (" + stu.rollNo + ")";
+        document.getElementById("setupStudentMeta").textContent = "Program: " + stu.program + " • Verify your allocated Narmada Room Number below";
+        document.getElementById("inputVerifyRoom").value = "";
+        document.getElementById("inputSetupEmail").value = stu.rollNo.toLowerCase() + "@smail.iitm.ac.in";
+      } else {
+        boxSetup.classList.add("hidden");
+        boxLogin.classList.remove("hidden");
+        document.getElementById("loginStudentName").textContent = stu.name + " (Room " + stu.roomNo + ")";
+        document.getElementById("inputLoginPassword").value = "";
+      }
+    }
+
+    function handleCompleteFirstTimeSetup() {
+      if (!pendingStudentSetup) return;
+      const enteredRoom = Number(document.getElementById("inputVerifyRoom").value || 0);
+      const phone = String(document.getElementById("inputSetupPhone").value || "").trim();
+      const email = String(document.getElementById("inputSetupEmail").value || "").trim();
+      const pw = String(document.getElementById("inputSetupPassword").value || "").trim();
+
+      if (enteredRoom !== Number(pendingStudentSetup.roomNo)) {
+        showToast("Room Number mismatch! Please enter the exact Room Number assigned to " + pendingStudentSetup.rollNo + " in Narmada Hostel.", "error");
+        return;
+      }
+      if (phone.length < 8) {
+        showToast("Please enter a valid 10-digit Phone / WhatsApp number so the next slot holder can reach you if needed.", "warn");
+        return;
+      }
+      if (!email.includes("@")) {
+        showToast("Please enter your valid email address for 5-minute expiry alerts.", "warn");
+        return;
+      }
+      if (pw.length < 4) {
+        showToast("Please choose a password with at least 4 characters.", "warn");
+        return;
+      }
+
+      pendingStudentSetup.passwordUpdated = true;
+      pendingStudentSetup.passwordHash = simpleHash(pw);
+      pendingStudentSetup.phone = phone;
+      pendingStudentSetup.email = email;
+      saveState('setupPassword', { rollNo: pendingStudentSetup.rollNo, roomNo: pendingStudentSetup.roomNo, phone: phone, email: email, password: pw });
+
+      currentUser = { role: "student", data: pendingStudentSetup };
+      showToast("Password encrypted & saved! Welcome, " + pendingStudentSetup.name + ".", "success");
+      switchMainView("student");
+    }
+
+    function handleReturningStudentSignIn() {
+      if (!pendingStudentSetup) return;
+      const pw = String(document.getElementById("inputLoginPassword").value || "").trim();
+      if (simpleHash(pw) !== pendingStudentSetup.passwordHash) {
+        showToast("Incorrect password. Ask the Admin to click 'Reset PW' if you forgot it.", "error");
+        return;
+      }
+      currentUser = { role: "student", data: pendingStudentSetup };
+      showToast("Welcome back, " + pendingStudentSetup.name + "!", "success");
+      switchMainView("student");
+    }
+
+    function handleAdminSignIn() {
+      const user = String(document.getElementById("inputAdminUser").value || "").trim().toLowerCase();
+      const pass = String(document.getElementById("inputAdminPass").value || "").trim();
+      if (user === state.adminCreds.username && simpleHash(pass) === state.adminCreds.passwordHash) {
+        currentUser = { role: "admin", data: { username: user, name: "Narmada Warden / Admin" } };
+        showToast("Logged in to Narmada Admin Control Center.", "success");
+        switchMainView("admin");
+      } else {
+        showToast("Invalid Admin credentials. Default is admin / narmada2026.", "error");
+      }
+    }
+
+    function switchMainView(view) {
+      const vAuth = document.getElementById("viewAuth");
+      const vStu = document.getElementById("viewStudent");
+      const vAdm = document.getElementById("viewAdmin");
+      const uBox = document.getElementById("headerUserBox");
+      const uLbl = document.getElementById("headerUserLabel");
+
+      vAuth.classList.add("hidden");
+      vStu.classList.add("hidden");
+      vAdm.classList.add("hidden");
+
+      if (view === "student" && currentUser) {
+        vStu.classList.remove("hidden");
+        uBox.classList.remove("hidden");
+        uBox.classList.add("flex");
+        uLbl.textContent = currentUser.data.name + " (" + currentUser.data.rollNo + " • Rm " + currentUser.data.roomNo + ")";
+        renderStudentPortal();
+      } else if (view === "admin" && currentUser) {
+        vAdm.classList.remove("hidden");
+        uBox.classList.remove("hidden");
+        uBox.classList.add("flex");
+        uLbl.textContent = "Admin: " + currentUser.data.name;
+        renderAdminPortal();
+      } else {
+        vAuth.classList.remove("hidden");
+        uBox.classList.add("hidden");
+        uBox.classList.remove("flex");
+        updateOverviewCounters();
+      }
+    }
+
+    // =========================================================================
+    // STUDENT PORTAL RENDERING & PRIVACY ENGINE
+    // =========================================================================
+    function renderStudentPortal() {
+      if (!currentUser || currentUser.role !== "student") return;
+      const stu = currentUser.data;
+      document.getElementById("stuBadgeRoll").textContent = stu.rollNo;
+      document.getElementById("stuBadgeRoom").textContent = "Room " + stu.roomNo + " • " + stu.program;
+      document.getElementById("stuWelcomeTitle").textContent = "Hi, " + stu.name;
+
+      // Date Buttons
+      const btnToday = document.getElementById("btnDateToday");
+      const btnTom = document.getElementById("btnDateTomorrow");
+      btnToday.textContent = "Today (Nov 12)";
+      btnTom.textContent = "Tomorrow (Nov 13)";
+      btnToday.className = "px-3.5 py-1.5 rounded-xl text-xs font-semibold transition " +
+        (selectedStuDate === TODAY_STR ? "bg-slate-900 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-700");
+      btnTom.className = "px-3.5 py-1.5 rounded-xl text-xs font-semibold transition " +
+        (selectedStuDate === TOMORROW_STR ? "bg-slate-900 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-700");
+
+      // Floor filter highlight
+      document.querySelectorAll(".stu-floor-btn").forEach(btn => {
+        const f = btn.getAttribute("data-floor");
+        if (f === selectedStuFloor) {
+          btn.className = "stu-floor-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-blue-600 text-white";
+        } else {
+          btn.className = "stu-floor-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200";
+        }
+      });
+
+      renderStudentActiveBookingCard();
+      renderStudentMachinesGrid();
+      renderStudentComplaintsSection();
+    }
+
+    function renderStudentActiveBookingCard() {
+      const container = document.getElementById("stuActiveBookingContainer");
+      const stu = currentUser.data;
+      const myBooking = state.bookings.find(b => b.status === "ACTIVE" && b.rollNo.toUpperCase() === stu.rollNo.toUpperCase());
+
+      if (!myBooking) {
+        container.innerHTML = `
+          <div class="bg-blue-50/70 border border-blue-200 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
+            <div class="text-xs text-blue-950">
+              <strong>You have 0 active upcoming bookings.</strong> You can book up to <strong>1 active slot in advance</strong> on any Healthy machine across Floors 0–3.
+            </div>
+            <span class="text-[11px] font-semibold text-blue-700 bg-blue-100 px-2.5 py-1 rounded-lg">Limit: Max 1 Active Slot</span>
+          </div>
+        `;
+        return;
+      }
+
+      // Check if there is a previous slot holder (Slot N - 1) on the same date & machine!
+      const prevBooking = state.bookings.find(
+        b => b.status === "ACTIVE" &&
+             b.date === myBooking.date &&
+             b.machineId === myBooking.machineId &&
+             Number(b.slotNum) === Number(myBooking.slotNum) - 1
+      );
+
+      let prevUserHtml = "";
+      if (prevBooking) {
+        prevUserHtml = `
+          <div class="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-950 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <span class="font-bold uppercase text-[10px] tracking-wider bg-amber-200 text-amber-900 px-2 py-0.5 rounded mr-1.5">Next-Slot Privacy Unlock</span>
+              <span>Previous Slot (#${prevBooking.slotNum}) Resident: <strong>${escapeHtml(prevBooking.studentName)}</strong> (Room <strong>${escapeHtml(prevBooking.roomNo)}</strong> • Ph: <strong>${escapeHtml(prevBooking.phone || "Not set")}</strong>)</span>
+            </div>
+            <span class="text-[11px] text-amber-800">Visible only to you so you can contact them if clothes aren't removed</span>
+          </div>
+        `;
+      } else {
+        prevUserHtml = `
+          <div class="mt-3 p-2.5 rounded-xl bg-slate-100 text-xs text-slate-600">
+            <strong>Previous Slot (#${myBooking.slotNum - 1}):</strong> No resident booked immediately before your slot (or you have Slot #1).
+          </div>
+        `;
+      }
+
+      const checkInBadge = myBooking.checkedIn
+        ? `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">✓ Clothes Loaded (Checked In)</span>`
+        : `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">⏳ Awaiting +5m Check-In Confirmation</span>`;
+
+      container.innerHTML = `
+        <div class="bg-white rounded-2xl shadow-sm border-2 border-blue-600 p-5 space-y-3">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs font-bold uppercase tracking-wider text-blue-600">My Active Booking</span>
+                ${checkInBadge}
+              </div>
+              <h3 class="text-base font-bold text-slate-900 mt-1">
+                Machine ${escapeHtml(myBooking.machineId)} (Floor ${myBooking.floor}) • Slot #${myBooking.slotNum}: ${escapeHtml(myBooking.slotTiming)}
+              </h3>
+              <p class="text-xs text-slate-500">Date: ${escapeHtml(myBooking.date)} • Booking ID: ${escapeHtml(myBooking.bookingId)}</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              ${!myBooking.checkedIn ? `
+                <button type="button" onclick="confirmStudentCheckIn('${myBooking.bookingId}')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition">
+                  ✓ I've Loaded My Clothes (Check In)
+                </button>
+              ` : ""}
+              <button type="button" onclick="simulateCheckInNudge('${myBooking.bookingId}')" class="px-3 py-2 rounded-xl text-xs font-semibold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 transition">
+                Test +5m Check-In Prompt
+              </button>
+              <button type="button" onclick="simulateExpiryNudge('${myBooking.bookingId}')" class="px-3 py-2 rounded-xl text-xs font-semibold bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 transition">
+                Test T-5m Expiry Alert
+              </button>
+              <button type="button" onclick="cancelStudentBooking('${myBooking.bookingId}')" class="px-3 py-2 rounded-xl text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition">
+                Cancel / Free Slot
+              </button>
+            </div>
+          </div>
+          ${prevUserHtml}
+        </div>
+      `;
+    }
+
+    function renderStudentMachinesGrid() {
+      const sickMachines = state.machines.filter(m => m.status !== "Healthy");
+      const noticeEl = document.getElementById("stuSickMachinesNotice");
+      if (sickMachines.length > 0) {
+        noticeEl.classList.remove("hidden");
+        noticeEl.innerHTML = `
+          <span><strong>Maintenance Filter Active:</strong> Only <strong>Healthy</strong> machines are shown below. Currently hidden (<code class="font-mono">Sick</code>): <strong>${sickMachines.map(m => m.id + " (Floor " + m.floor + ")").join(", ")}</strong>.</span>
+          <span class="text-[11px] font-semibold">Auto-updated by Admin</span>
+        `;
+      } else {
+        noticeEl.classList.add("hidden");
+      }
+
+      const healthyMachines = state.machines.filter(m => {
+        if (m.status !== "Healthy") return false;
+        if (selectedStuFloor !== "ALL" && String(m.floor) !== String(selectedStuFloor)) return false;
+        return true;
+      });
+
+      const grid = document.getElementById("stuMachinesGrid");
+      if (healthyMachines.length === 0) {
+        grid.innerHTML = `<div class="bg-white rounded-2xl p-8 text-center text-sm text-slate-500 border border-slate-200">No Healthy machines on the selected floor. Try switching to All Floors.</div>`;
+        return;
+      }
+
+      const stuRoll = currentUser.data.rollNo.toUpperCase();
+      const myActiveBooking = state.bookings.find(b => b.status === "ACTIVE" && b.rollNo.toUpperCase() === stuRoll);
+
+      grid.innerHTML = healthyMachines.map(m => {
+        const slots = generateMachineSlots(m.cycleMins);
+        const slotButtons = slots.map(s => {
+          const booking = state.bookings.find(
+            b => b.status === "ACTIVE" && b.date === selectedStuDate && b.machineId === m.id && Number(b.slotNum) === s.slotNum
+          );
+          if (!booking) {
+            return `
+              <button type="button" onclick="bookStudentSlot('${m.id}', ${m.floor}, ${s.slotNum}, '${s.timing}')"
+                class="p-2.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/60 text-left transition group">
+                <div class="flex items-center justify-between">
+                  <span class="text-[11px] font-bold text-slate-700 group-hover:text-blue-700">Slot #${s.slotNum}</span>
+                  <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">Free</span>
+                </div>
+                <p class="text-xs font-mono font-semibold text-slate-900 mt-1">${s.timing}</p>
+              </button>
+            `;
+          }
+
+          const isMine = booking.rollNo.toUpperCase() === stuRoll;
+          // Check if current student holds Slot s.slotNum + 1 on this same machine & date
+          const isPrevToMine = myActiveBooking &&
+            myActiveBooking.date === selectedStuDate &&
+            myActiveBooking.machineId === m.id &&
+            Number(myActiveBooking.slotNum) === s.slotNum + 1;
+
+          if (isMine) {
+            return `
+              <div class="p-2.5 rounded-xl border-2 border-blue-600 bg-blue-50 text-left">
+                <div class="flex items-center justify-between">
+                  <span class="text-[11px] font-bold text-blue-900">Slot #${s.slotNum}</span>
+                  <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-600 text-white">Your Slot</span>
+                </div>
+                <p class="text-xs font-mono font-bold text-blue-950 mt-1">${s.timing}</p>
+                <p class="text-[10px] text-blue-700 mt-0.5 truncate">${booking.checkedIn ? "✓ Checked In" : "Pending +5m check-in"}</p>
+              </div>
+            `;
+          }
+
+          if (isPrevToMine) {
+            return `
+              <div class="p-2.5 rounded-xl border border-amber-300 bg-amber-50 text-left" title="Revealed because you hold the next slot (#${s.slotNum + 1})">
+                <div class="flex items-center justify-between">
+                  <span class="text-[11px] font-bold text-amber-900">Slot #${s.slotNum}</span>
+                  <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-200 text-amber-900">Prev User</span>
+                </div>
+                <p class="text-xs font-mono font-semibold text-amber-950 mt-1">${s.timing}</p>
+                <p class="text-[10px] text-amber-900 font-medium mt-0.5 truncate">Rm ${booking.roomNo} • ${escapeHtml(booking.phone || "No Ph")}</p>
+              </div>
+            `;
+          }
+
+          return `
+            <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-100/80 text-left opacity-75 cursor-not-allowed">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-semibold text-slate-500">Slot #${s.slotNum}</span>
+                <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-slate-200 text-slate-600">Booked</span>
+              </div>
+              <p class="text-xs font-mono text-slate-500 mt-1">${s.timing}</p>
+              <p class="text-[10px] text-slate-400 mt-0.5">Private</p>
+            </div>
+          `;
+        }).join("");
+
+        return `
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-3.5">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div class="flex items-center gap-2.5">
+                <span class="px-2.5 py-1 rounded-lg bg-slate-900 text-white font-bold text-xs">${m.id}</span>
+                <div>
+                  <h4 class="text-sm font-bold text-slate-900">Rest Room ${m.id} Washing Machine • Floor ${m.floor}</h4>
+                  <p class="text-xs text-slate-500">Cycle Duration: <strong>${m.cycleMins} mins</strong> • <strong>${slots.length} continuous slots/day</strong> (resets 00:00)</p>
+                </div>
+              </div>
+              <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                ● Healthy
+              </span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
+              ${slotButtons}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    window.bookStudentSlot = function(machineId, floor, slotNum, slotTiming) {
+      if (!currentUser || currentUser.role !== "student") return;
+      const stu = currentUser.data;
+      const existingMy = state.bookings.find(b => b.status === "ACTIVE" && b.rollNo.toUpperCase() === stu.rollNo.toUpperCase());
+      if (existingMy) {
+        showToast("You already have 1 active booking (" + existingMy.machineId + " on " + existingMy.date + ", " + existingMy.slotTiming + "). Cancel it first if you wish to switch.", "warn");
+        return;
+      }
+      const taken = state.bookings.find(
+        b => b.status === "ACTIVE" && b.date === selectedStuDate && b.machineId === machineId && Number(b.slotNum) === Number(slotNum)
+      );
+      if (taken) {
+        showToast("This slot is already booked.", "error");
+        return;
+      }
+
+      const newBooking = {
+        bookingId: "BK-" + Math.random().toString(36).substring(2, 7).toUpperCase(),
+        date: selectedStuDate,
+        floor: Number(floor),
+        machineId: machineId,
+        slotNum: Number(slotNum),
+        slotTiming: slotTiming,
+        rollNo: stu.rollNo,
+        studentName: stu.name,
+        roomNo: stu.roomNo,
+        phone: stu.phone || "Not set",
+        email: stu.email || "",
+        status: "ACTIVE",
+        checkedIn: false,
+        bookedAt: new Date().toISOString()
+      };
+      state.bookings.push(newBooking);
+      saveState('bookSlot', newBooking);
+      showToast("Booked " + machineId + " (Floor " + floor + ") Slot #" + slotNum + " (" + slotTiming + ")!", "success");
+      renderStudentPortal();
+    };
+
+    window.confirmStudentCheckIn = function(bookingId) {
+      const b = state.bookings.find(x => x.bookingId === bookingId);
+      if (!b) return;
+      b.checkedIn = true;
+      saveState('checkInSlot', { bookingId: b.bookingId });
+      showToast("Check-in confirmed! Your slot on " + b.machineId + " is locked in.", "success");
+      renderStudentPortal();
+    };
+
+    window.cancelStudentBooking = function(bookingId) {
+      const b = state.bookings.find(x => x.bookingId === bookingId);
+      if (!b) return;
+      b.status = "CANCELLED";
+      saveState('cancelSlot', { bookingId: b.bookingId, reason: 'Cancelled by student' });
+      showToast("Slot #" + b.slotNum + " on " + b.machineId + " has been released and is now Free.", "info");
+      renderStudentPortal();
+    };
+
+    window.simulateCheckInNudge = function(bookingId) {
+      const b = state.bookings.find(x => x.bookingId === bookingId);
+      if (!b) return;
+      playAlertChime();
+      if (b.checkedIn) {
+        showToast("+5m Check-In Check: You already confirmed loading clothes for " + b.machineId + " (" + b.slotTiming + ").", "success");
+      } else {
+        showToast("+5 Min Nudge: Have you put your clothes in " + b.machineId + "? Click 'I've Loaded My Clothes' now, or this slot will auto-release to Free!", "warn");
+      }
+    };
+
+    window.simulateExpiryNudge = function(bookingId) {
+      const b = state.bookings.find(x => x.bookingId === bookingId);
+      if (!b) return;
+      playAlertChime();
+      showToast("⏰ 5-Minute Expiry Nudge: Your wash cycle on " + b.machineId + " (" + b.slotTiming + ") ends in 5 minutes! Please collect your laundry promptly.", "info");
+      try {
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification("Narmada Laundry — 5 Mins Remaining!", {
+            body: "Machine " + b.machineId + " (" + b.slotTiming + ") finishes in 5 mins. Please remove your clothes."
+          });
+        }
+      } catch (e) {}
+    };
+
+    function renderStudentComplaintsSection() {
+      const sel = document.getElementById("inputCompMachine");
+      if (sel && sel.options.length === 0) {
+        sel.innerHTML = state.machines
+          .map(m => '<option value="' + m.id + '">' + m.id + ' (Floor ' + m.floor + ' • ' + m.cycleMins + 'm • ' + m.status + ')</option>')
+          .join("");
+      }
+      const listEl = document.getElementById("stuComplaintsList");
+      const myRoll = currentUser.data.rollNo.toUpperCase();
+      const items = state.complaints.filter(c => c.rollNo.toUpperCase() === myRoll);
+      if (items.length === 0) {
+        listEl.innerHTML = `<p class="text-xs text-slate-400 py-4">You haven't reported any maintenance tickets yet.</p>`;
+        return;
+      }
+      listEl.innerHTML = items.map(c => `
+        <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-900">${escapeHtml(c.machineId)} (Floor ${c.floor}) — ${escapeHtml(c.issueType)}</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${c.status === "RESOLVED" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}">${escapeHtml(c.status)}</span>
+          </div>
+          <p class="text-xs text-slate-600">${escapeHtml(c.description)}</p>
+          ${c.adminNotes ? `<p class="text-[11px] text-blue-700 font-medium pt-1">Admin Response: ${escapeHtml(c.adminNotes)}</p>` : ""}
+        </div>
+      `).join("");
+    }
+
+    // =========================================================================
+    // ADMIN PORTAL RENDERING & CONTROLS
+    // =========================================================================
+    function renderAdminPortal() {
+      if (!currentUser || currentUser.role !== "admin") return;
+
+      const openCompCount = state.complaints.filter(c => c.status !== "RESOLVED").length;
+      const badge = document.getElementById("adminOpenCompBadge");
+      if (badge) badge.textContent = String(openCompCount);
+
+      document.querySelectorAll(".admin-tab-btn").forEach(btn => {
+        const t = btn.getAttribute("data-admin-tab");
+        btn.className = "admin-tab-btn px-3.5 py-2 rounded-xl text-xs font-semibold transition " +
+          (t === activeAdminTab ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200");
+      });
+
+      document.getElementById("adminPanelBookings").classList.toggle("hidden", activeAdminTab !== "bookings");
+      document.getElementById("adminPanelMachines").classList.toggle("hidden", activeAdminTab !== "machines");
+      document.getElementById("adminPanelComplaints").classList.toggle("hidden", activeAdminTab !== "complaints");
+      document.getElementById("adminPanelStudents").classList.toggle("hidden", activeAdminTab !== "students");
+
+      if (activeAdminTab === "bookings") renderAdminBookingsAndGrid();
+      if (activeAdminTab === "machines") renderAdminMachinesFleet();
+      if (activeAdminTab === "complaints") renderAdminComplaints();
+      if (activeAdminTab === "students") renderAdminStudentDirectory();
+    }
+
+    function renderAdminBookingsAndGrid() {
+      const inspectDate = document.getElementById("adminDateInput").value || TODAY_STR;
+      const floorFilter = document.getElementById("adminFloorFilter").value || "ALL";
+
+      const activeBookings = state.bookings.filter(b => b.status === "ACTIVE");
+      document.getElementById("adminTotalBookingsBadge").textContent = activeBookings.length + " Active Bookings";
+
+      const tbody = document.getElementById("adminBookingsTableBody");
+      if (activeBookings.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-slate-400">No active bookings right now.</td></tr>`;
+      } else {
+        tbody.innerHTML = activeBookings.map(b => `
+          <tr class="hover:bg-slate-50">
+            <td class="py-2.5 px-3 font-mono font-semibold">${escapeHtml(b.date)} • #${b.slotNum} (${escapeHtml(b.slotTiming)})</td>
+            <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded bg-slate-900 text-white font-bold">${escapeHtml(b.machineId)}</span> (Fl ${b.floor})</td>
+            <td class="py-2.5 px-3 font-medium text-slate-900">${escapeHtml(b.studentName)} <span class="text-slate-500">(${escapeHtml(b.rollNo)})</span></td>
+            <td class="py-2.5 px-3">Rm <strong>${escapeHtml(b.roomNo)}</strong> • ${escapeHtml(b.phone || "No Ph")}</td>
+            <td class="py-2.5 px-3">
+              ${b.checkedIn
+                ? `<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">YES (Loaded)</span>`
+                : `<button type="button" onclick="adminForceCheckIn('${b.bookingId}')" class="px-2 py-0.5 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-semibold">Pending (Click to Confirm)</button>`}
+            </td>
+            <td class="py-2.5 px-3 text-right">
+              <button type="button" onclick="adminCancelBooking('${b.bookingId}')" class="text-rose-600 hover:text-rose-800 font-semibold">Cancel / Free Slot</button>
+            </td>
+          </tr>
+        `).join("");
+      }
+
+      // Admin Visual Slot Grid across machines
+      const filteredMachines = state.machines.filter(m => floorFilter === "ALL" || String(m.floor) === String(floorFilter));
+      const grid = document.getElementById("adminMachinesGrid");
+      grid.innerHTML = filteredMachines.map(m => {
+        const slots = generateMachineSlots(m.cycleMins);
+        const isHealthy = m.status === "Healthy";
+        return `
+          <div class="bg-white rounded-2xl shadow-sm border ${isHealthy ? "border-slate-200" : "border-rose-300 bg-rose-50/30"} p-4 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 rounded-lg ${isHealthy ? "bg-slate-900 text-white" : "bg-rose-700 text-white"} font-bold text-xs">${m.id}</span>
+                <span class="text-sm font-bold text-slate-900">Floor ${m.floor} • ${m.cycleMins}m Cycle (${slots.length} slots)</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${isHealthy ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800"}">${m.status}</span>
+                <button type="button" onclick="adminToggleHealth('${m.id}')" class="text-xs px-2.5 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-semibold">
+                  Switch to ${isHealthy ? "Sick" : "Healthy"}
+                </button>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+              ${slots.map(s => {
+                const bk = state.bookings.find(b => b.status === "ACTIVE" && b.date === inspectDate && b.machineId === m.id && Number(b.slotNum) === s.slotNum);
+                if (bk) {
+                  return `
+                    <button type="button" onclick="openAdminSlotModal('${m.id}', ${m.floor}, ${s.slotNum}, '${s.timing}', '${inspectDate}')"
+                      class="p-2 rounded-xl border border-blue-300 bg-blue-50 text-left hover:bg-blue-100 transition">
+                      <div class="flex items-center justify-between text-[10px] font-bold text-blue-900">
+                        <span>#${s.slotNum} (${s.timing})</span>
+                        <span>Rm ${bk.roomNo}</span>
+                      </div>
+                      <p class="text-[11px] font-bold text-slate-900 truncate mt-0.5">${escapeHtml(bk.studentName)}</p>
+                      <p class="text-[10px] text-slate-600 truncate">${escapeHtml(bk.rollNo)} • ${bk.checkedIn ? "✓ In" : "Wait"}</p>
+                    </button>
+                  `;
+                }
+                return `
+                  <button type="button" onclick="openAdminSlotModal('${m.id}', ${m.floor}, ${s.slotNum}, '${s.timing}', '${inspectDate}')"
+                    class="p-2 rounded-xl border border-slate-200 bg-white hover:border-slate-400 text-left transition">
+                    <div class="flex items-center justify-between text-[10px] text-slate-500">
+                      <span>#${s.slotNum}</span>
+                      <span class="text-emerald-700 font-semibold">Free</span>
+                    </div>
+                    <p class="text-[11px] font-mono font-semibold text-slate-800 mt-0.5">${s.timing}</p>
+                    <p class="text-[10px] text-slate-400">+ Assign</p>
+                  </button>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    window.openAdminSlotModal = function(machineId, floor, slotNum, timing, dateStr) {
+      activeAdminSlotCtx = { machineId, floor, slotNum, timing, dateStr };
+      const modal = document.getElementById("modalAdminSlot");
+      const title = document.getElementById("modalAdminSlotTitle");
+      const body = document.getElementById("modalAdminSlotBody");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+
+      title.textContent = machineId + " (Floor " + floor + ") • Slot #" + slotNum + " (" + timing + ")";
+      const bk = state.bookings.find(b => b.status === "ACTIVE" && b.date === dateStr && b.machineId === machineId && Number(b.slotNum) === Number(slotNum));
+
+      if (bk) {
+        body.innerHTML = `
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+            <p><strong>Student:</strong> ${escapeHtml(bk.studentName)} (${escapeHtml(bk.rollNo)})</p>
+            <p><strong>Room Number:</strong> ${escapeHtml(bk.roomNo)}</p>
+            <p><strong>Phone:</strong> ${escapeHtml(bk.phone || "Not set")}</p>
+            <p><strong>Email:</strong> ${escapeHtml(bk.email || "Not set")}</p>
+            <p><strong>Check-In Status:</strong> ${bk.checkedIn ? "Confirmed (Clothes Loaded)" : "Not Checked In Yet"}</p>
+          </div>
+          <div class="flex items-center justify-end gap-2 pt-2">
+            ${!bk.checkedIn ? `<button type="button" onclick="adminForceCheckIn('${bk.bookingId}'); closeAdminSlotModal();" class="px-3 py-2 rounded-xl bg-emerald-600 text-white font-semibold">Mark Checked In</button>` : ""}
+            <button type="button" onclick="adminCancelBooking('${bk.bookingId}'); closeAdminSlotModal();" class="px-3 py-2 rounded-xl bg-rose-600 text-white font-semibold">Cancel &amp; Free Slot</button>
+          </div>
+        `;
+      } else {
+        body.innerHTML = `
+          <p class="text-slate-600">Assign this slot on <strong>${escapeHtml(dateStr)}</strong> to any Narmada resident:</p>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Student Roll Number</label>
+            <input id="adminAssignRollInput" list="rollList" type="text" placeholder="e.g. HS22H059"
+              class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs uppercase" />
+          </div>
+          <div class="flex justify-end pt-2">
+            <button type="button" onclick="confirmAdminAssignSlot()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold">
+              Book Slot for Student
+            </button>
+          </div>
+        `;
+      }
+    };
+
+    window.closeAdminSlotModal = function() {
+      const modal = document.getElementById("modalAdminSlot");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    };
+
+    window.confirmAdminAssignSlot = function() {
+      if (!activeAdminSlotCtx) return;
+      const roll = String(document.getElementById("adminAssignRollInput").value || "").trim().toUpperCase();
+      const stu = state.students.find(s => s.rollNo.toUpperCase() === roll);
+      if (!stu) {
+        showToast("Roll Number " + roll + " not found in Narmada directory.", "error");
+        return;
+      }
+      state.bookings.push({
+        bookingId: "BK-ADM-" + Math.random().toString(36).substring(2, 6).toUpperCase(),
+        date: activeAdminSlotCtx.dateStr,
+        floor: activeAdminSlotCtx.floor,
+        machineId: activeAdminSlotCtx.machineId,
+        slotNum: activeAdminSlotCtx.slotNum,
+        slotTiming: activeAdminSlotCtx.timing,
+        rollNo: stu.rollNo,
+        studentName: stu.name,
+        roomNo: stu.roomNo,
+        phone: stu.phone || "Admin Assigned",
+        email: stu.email || "",
+        status: "ACTIVE",
+        checkedIn: true,
+        bookedAt: new Date().toISOString()
+      });
+      saveState();
+      closeAdminSlotModal();
+      showToast("Assigned " + activeAdminSlotCtx.machineId + " Slot #" + activeAdminSlotCtx.slotNum + " to " + stu.name + ".", "success");
+      renderAdminBookingsAndGrid();
+    };
+
+    window.adminForceCheckIn = function(bookingId) {
+      const b = state.bookings.find(x => x.bookingId === bookingId);
+      if (!b) return;
+      b.checkedIn = true;
+      saveState('checkInSlot', { bookingId: b.bookingId });
+      showToast("Marked " + b.studentName + " as Checked In.", "success");
+      renderAdminBookingsAndGrid();
+    };
+
+    window.adminCancelBooking = function(bookingId) {
+      const b = state.bookings.find(x => x.bookingId === bookingId);
+      if (!b) return;
+      b.status = "CANCELLED_BY_ADMIN";
+      saveState('cancelSlot', { bookingId: b.bookingId, reason: 'Cancelled by Admin' });
+      showToast("Cancelled booking for " + b.studentName + " on " + b.machineId + ".", "info");
+      renderAdminBookingsAndGrid();
+    };
+
+    function renderAdminMachinesFleet() {
+      const container = document.getElementById("adminFleetCards");
+      container.innerHTML = state.machines.map(m => {
+        const isHealthy = m.status === "Healthy";
+        const slotsPerDay = Math.floor(1440 / m.cycleMins);
+        return `
+          <div class="p-4 rounded-2xl border ${isHealthy ? "border-slate-200 bg-white" : "border-rose-300 bg-rose-50/40"} space-y-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-xs font-bold px-2.5 py-1 rounded-lg ${isHealthy ? "bg-slate-900 text-white" : "bg-rose-700 text-white"}">${m.id}</span>
+                <span class="text-xs font-semibold text-slate-500 ml-1.5">Floor ${m.floor}</span>
+              </div>
+              <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${isHealthy ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800"}">
+                ${m.status}
+              </span>
+            </div>
+
+            <div class="flex items-center justify-between text-xs text-slate-600 pt-1">
+              <span>Cycle Time (mins):</span>
+              <div class="flex items-center gap-1.5">
+                <input id="cycleInput_${m.id}" type="number" min="20" max="240" value="${m.cycleMins}"
+                  class="w-16 rounded-lg border border-slate-300 px-2 py-1 text-xs font-bold text-right" />
+                <button type="button" onclick="adminUpdateCycleMins('${m.id}')" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold">
+                  Save
+                </button>
+              </div>
+            </div>
+
+            <p class="text-[11px] text-slate-500">Generates <strong>${slotsPerDay} continuous slots/day</strong></p>
+
+            <button type="button" onclick="adminToggleHealth('${m.id}')"
+              class="w-full py-2 rounded-xl text-xs font-bold transition ${isHealthy ? "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200" : "bg-emerald-600 hover:bg-emerald-700 text-white"}">
+              ${isHealthy ? "Mark as Sick (Hide Slots & Auto-Release)" : "Mark as Healthy (Open Slots to Students)"}
+            </button>
+          </div>
+        `;
+      }).join("");
+    }
+
+    window.adminToggleHealth = function(machineId) {
+      const m = state.machines.find(x => x.id === machineId);
+      if (!m) return;
+      m.status = (m.status === "Healthy") ? "Sick" : "Healthy";
+      let released = 0;
+      if (m.status === "Sick") {
+        state.bookings.forEach(b => {
+          if (b.status === "ACTIVE" && b.machineId === machineId) {
+            b.status = "CANCELLED_MACHINE_SICK";
+            released++;
+          }
+        });
+      }
+      saveState('toggleMachineHealth', { machineId: m.id, status: m.status });
+      showToast(
+        m.id + " is now marked " + m.status + (released > 0 ? " (" + released + " upcoming booking auto-released so resident can rebook)." : "."),
+        m.status === "Healthy" ? "success" : "warn"
+      );
+      renderAdminPortal();
+    };
+
+    window.adminUpdateCycleMins = function(machineId) {
+      const m = state.machines.find(x => x.id === machineId);
+      const inp = document.getElementById("cycleInput_" + machineId);
+      if (!m || !inp) return;
+      const val = Number(inp.value || 80);
+      if (val < 20 || val > 240) {
+        showToast("Cycle duration must be between 20 and 240 minutes.", "warn");
+        return;
+      }
+      m.cycleMins = val;
+      saveState();
+      showToast("Updated " + machineId + " cycle duration to " + val + " mins (" + Math.floor(1440 / val) + " slots/day).", "success");
+      renderAdminPortal();
+    };
+
+    function renderAdminComplaints() {
+      const container = document.getElementById("adminComplaintsContainer");
+      if (state.complaints.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 py-4">No complaints reported.</p>`;
+        return;
+      }
+      container.innerHTML = state.complaints.map(c => `
+        <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-2.5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <span class="px-2 py-0.5 rounded bg-slate-900 text-white text-xs font-bold">${escapeHtml(c.machineId)} (Floor ${c.floor})</span>
+              <span class="text-xs font-bold text-slate-900 ml-2">${escapeHtml(c.issueType)}</span>
+              <span class="text-xs text-slate-500 ml-2">by ${escapeHtml(c.studentName)} (${escapeHtml(c.rollNo)}, Rm ${escapeHtml(c.roomNo)})</span>
+            </div>
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${c.status === "RESOLVED" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}">${escapeHtml(c.status)}</span>
+          </div>
+          <p class="text-xs text-slate-700">${escapeHtml(c.description)}</p>
+          <div class="flex flex-wrap items-center gap-2 pt-1">
+            <input id="compNote_${c.ticketId}" type="text" value="${escapeHtml(c.adminNotes || "")}" placeholder="Add resolution note..."
+              class="flex-1 rounded-xl border border-slate-300 px-3 py-1.5 text-xs bg-white" />
+            <button type="button" onclick="adminResolveComplaint('${c.ticketId}', 'RESOLVED')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold">
+              Mark Resolved
+            </button>
+            <button type="button" onclick="adminResolveComplaint('${c.ticketId}', 'OPEN')" class="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold">
+              Keep Open
+            </button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    window.adminResolveComplaint = function(ticketId, status) {
+      const c = state.complaints.find(x => x.ticketId === ticketId);
+      if (!c) return;
+      const noteEl = document.getElementById("compNote_" + ticketId);
+      c.status = status;
+      if (noteEl) c.adminNotes = noteEl.value.trim();
+      saveState("updateComplaint", { ticketId: c.ticketId, status: c.status, adminNotes: c.adminNotes });
+      showToast("Updated ticket " + ticketId + " (" + status + ").", "success");
+      renderAdminPortal();
+    };
+
+    function renderAdminStudentDirectory() {
+      const q = String(document.getElementById("inputSearchStudents").value || "").trim().toLowerCase();
+      const filtered = state.students.filter(s =>
+        !q ||
+        s.rollNo.toLowerCase().includes(q) ||
+        s.name.toLowerCase().includes(q) ||
+        String(s.roomNo).includes(q) ||
+        s.program.toLowerCase().includes(q)
+      );
+      document.getElementById("stuCountLabel").textContent = String(filtered.length);
+      const tbody = document.getElementById("adminStudentsTableBody");
+      tbody.innerHTML = filtered.slice(0, 120).map(s => `
+        <tr class="hover:bg-slate-50">
+          <td class="py-2 px-3 font-mono font-semibold">${s.roomNo}</td>
+          <td class="py-2 px-3 font-mono font-bold text-blue-700">${escapeHtml(s.rollNo)}</td>
+          <td class="py-2 px-3 font-medium text-slate-900">${escapeHtml(s.name)}</td>
+          <td class="py-2 px-3 text-slate-500">${escapeHtml(s.program)}</td>
+          <td class="py-2 px-3 text-slate-600">${escapeHtml(s.phone || "—")}</td>
+          <td class="py-2 px-3">
+            ${s.passwordUpdated
+              ? `<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold text-[10px]">YES</span>`
+              : `<span class="px-2 py-0.5 rounded bg-slate-100 text-slate-500 font-semibold text-[10px]">NO</span>`}
+          </td>
+          <td class="py-2 px-3 text-right space-x-2">
+            <button type="button" onclick="adminLoadStudentForEdit('${s.rollNo}')" class="text-blue-600 hover:underline font-semibold">Edit</button>
+            <button type="button" onclick="adminResetStudentPW('${s.rollNo}')" class="text-rose-600 hover:underline font-semibold">Reset PW</button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    window.adminLoadStudentForEdit = function(rollNo) {
+      const s = state.students.find(x => x.rollNo === rollNo);
+      if (!s) return;
+      document.getElementById("admStuRoll").value = s.rollNo;
+      document.getElementById("admStuName").value = s.name;
+      document.getElementById("admStuRoom").value = s.roomNo;
+      document.getElementById("admStuProgram").value = s.program;
+      document.getElementById("admStuPhone").value = s.phone || "";
+      document.getElementById("admStuEmail").value = s.email || "";
+      showToast("Loaded " + s.name + " (" + s.rollNo + ") into editor.", "info");
+    };
+
+    window.adminResetStudentPW = function(rollNo) {
+      const s = state.students.find(x => x.rollNo === rollNo);
+      if (!s) return;
+      s.passwordUpdated = false;
+      s.passwordHash = "";
+      saveState("resetStudentPassword", { rollNo: s.rollNo });
+      showToast("Cleared password for " + s.name + " (" + s.rollNo + "). They can now set a new password with Room " + s.roomNo + ".", "success");
+      renderAdminStudentDirectory();
+    };
+
+    // =========================================================================
+    // EVENT LISTENERS WIRING
+    // =========================================================================
+    window.addEventListener("DOMContentLoaded", () => {
+      updateOverviewCounters();
+      populateRollDatalist();
+      pullCloudState();
+
+      // Auth Tab Switching
+      document.getElementById("tabAuthStudent").addEventListener("click", () => {
+        document.getElementById("panelStudentAuth").classList.remove("hidden");
+        document.getElementById("panelAdminAuth").classList.add("hidden");
+        document.getElementById("tabAuthStudent").className = "py-3.5 text-sm font-semibold border-b-2 border-blue-600 text-blue-600 bg-white transition";
+        document.getElementById("tabAuthAdmin").className = "py-3.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition";
+      });
+
+      document.getElementById("tabAuthAdmin").addEventListener("click", () => {
+        document.getElementById("panelAdminAuth").classList.remove("hidden");
+        document.getElementById("panelStudentAuth").classList.add("hidden");
+        document.getElementById("tabAuthAdmin").className = "py-3.5 text-sm font-semibold border-b-2 border-blue-600 text-blue-600 bg-white transition";
+        document.getElementById("tabAuthStudent").className = "py-3.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition";
+      });
+
+      // Sample Roll Pills
+      document.querySelectorAll(".sample-roll-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.getElementById("inputStudentRoll").value = btn.getAttribute("data-sample-roll");
+          handleCheckRollClick();
+        });
+      });
+
+      document.getElementById("btnCheckRoll").addEventListener("click", handleCheckRollClick);
+      document.getElementById("btnCompleteSetup").addEventListener("click", handleCompleteFirstTimeSetup);
+      document.getElementById("btnStudentSignIn").addEventListener("click", handleReturningStudentSignIn);
+      document.getElementById("btnAdminSignIn").addEventListener("click", handleAdminSignIn);
+
+      document.getElementById("btnQuickFillAdmin").addEventListener("click", () => {
+        document.getElementById("inputAdminUser").value = "admin";
+        document.getElementById("inputAdminPass").value = "narmada2026";
+        handleAdminSignIn();
+      });
+
+      document.getElementById("btnLogout").addEventListener("click", () => {
+        currentUser = null;
+        pendingStudentSetup = null;
+        document.getElementById("boxFirstTimeSetup").classList.add("hidden");
+        document.getElementById("boxReturningLogin").classList.add("hidden");
+        switchMainView("auth");
+      });
+
+      // Student Sub-Tabs
+      document.getElementById("tabStuBook").addEventListener("click", () => {
+        document.getElementById("panelStuBook").classList.remove("hidden");
+        document.getElementById("panelStuComplaint").classList.add("hidden");
+        document.getElementById("tabStuBook").className = "px-3.5 py-2 rounded-xl text-xs font-semibold bg-blue-600 text-white transition";
+        document.getElementById("tabStuComplaint").className = "px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition";
+      });
+
+      document.getElementById("tabStuComplaint").addEventListener("click", () => {
+        document.getElementById("panelStuComplaint").classList.remove("hidden");
+        document.getElementById("panelStuBook").classList.add("hidden");
+        document.getElementById("tabStuComplaint").className = "px-3.5 py-2 rounded-xl text-xs font-semibold bg-blue-600 text-white transition";
+        document.getElementById("tabStuBook").className = "px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition";
+        renderStudentComplaintsSection();
+      });
+
+      document.getElementById("btnEnableBrowserNotif").addEventListener("click", () => {
+        playAlertChime();
+        if ("Notification" in window) {
+          Notification.requestPermission().then(p => {
+            showToast("Browser notification permission: " + p + ". Sound + T-5m alerts active!", "success");
+          }).catch(() => {
+            showToast("In-app audio chime + T-5m banner alerts enabled!", "success");
+          });
+        } else {
+          showToast("In-app audio chime + T-5m banner alerts enabled!", "success");
+        }
+      });
+
+      // Student Date & Floor Filters
+      document.getElementById("btnDateToday").addEventListener("click", () => {
+        selectedStuDate = TODAY_STR;
+        renderStudentPortal();
+      });
+      document.getElementById("btnDateTomorrow").addEventListener("click", () => {
+        selectedStuDate = TOMORROW_STR;
+        renderStudentPortal();
+      });
+      document.querySelectorAll(".stu-floor-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          selectedStuFloor = btn.getAttribute("data-floor");
+          renderStudentPortal();
+        });
+      });
+
+      // Submit Student Complaint
+      document.getElementById("btnSubmitComplaint").addEventListener("click", () => {
+        if (!currentUser || currentUser.role !== "student") return;
+        const machId = document.getElementById("inputCompMachine").value;
+        const issueType = document.getElementById("inputCompType").value;
+        const desc = document.getElementById("inputCompDesc").value.trim();
+        if (!desc) {
+          showToast("Please describe the issue with " + machId + ".", "warn");
+          return;
+        }
+        const machObj = state.machines.find(m => m.id === machId);
+        state.complaints.unshift({
+          ticketId: "CMP-" + Math.random().toString(36).substring(2, 6).toUpperCase(),
+          reportedAt: new Date().toISOString().slice(0, 16).replace("T", " "),
+          rollNo: currentUser.data.rollNo,
+          studentName: currentUser.data.name,
+          roomNo: currentUser.data.roomNo,
+          phone: currentUser.data.phone || "",
+          floor: machObj ? machObj.floor : 0,
+          machineId: machId,
+          issueType: issueType,
+          description: desc,
+          status: "OPEN",
+          adminNotes: ""
+        });
+        document.getElementById("inputCompDesc").value = "";
+        saveState("submitComplaint", state.complaints[0]);
+        showToast("Maintenance ticket submitted for " + machId + "!", "success");
+        renderStudentComplaintsSection();
+      });
+
+      // Admin Navigation Tabs
+      document.querySelectorAll(".admin-tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          activeAdminTab = btn.getAttribute("data-admin-tab");
+          renderAdminPortal();
+        });
+      });
+
+      document.getElementById("adminDateInput").addEventListener("change", renderAdminBookingsAndGrid);
+      document.getElementById("adminFloorFilter").addEventListener("change", renderAdminBookingsAndGrid);
+      document.getElementById("inputSearchStudents").addEventListener("input", renderAdminStudentDirectory);
+
+      // Admin Save / Upsert Student
+      document.getElementById("btnAdminSaveStudent").addEventListener("click", () => {
+        const roll = document.getElementById("admStuRoll").value.trim().toUpperCase();
+        const name = document.getElementById("admStuName").value.trim();
+        const room = Number(document.getElementById("admStuRoom").value || 0);
+        const prog = document.getElementById("admStuProgram").value.trim() || "B.Tech";
+        const phone = document.getElementById("admStuPhone").value.trim();
+        const email = document.getElementById("admStuEmail").value.trim();
+        if (!roll || !name || !room) {
+          showToast("Roll Number, Name, and Room Number are required.", "warn");
+          return;
+        }
+        const existing = state.students.find(s => s.rollNo.toUpperCase() === roll);
+        if (existing) {
+          existing.name = name;
+          existing.roomNo = room;
+          existing.program = prog;
+          existing.phone = phone;
+          existing.email = email;
+          showToast("Updated resident record for " + name + " (" + roll + ").", "success");
+        } else {
+          state.students.unshift({
+            roomNo: room,
+            rollNo: roll,
+            name: name,
+            gender: "Male",
+            course: prog.split("-")[0] || "B.Tech",
+            program: prog,
+            passwordUpdated: false,
+            passwordHash: "",
+            phone: phone,
+            email: email
+          });
+          populateRollDatalist();
+          showToast("Added new Narmada resident " + name + " (" + roll + ").", "success");
+        }
+        saveState("upsertStudent", { rollNo: roll, name: name, roomNo: room, course: prog.split("-")[0] || "B.Tech", program: prog, phone: phone, email: email });
+        renderAdminStudentDirectory();
+      });
+
+      // Sync Modal Controls
+      document.getElementById("btnOpenSyncModal").addEventListener("click", () => {
+        document.getElementById("inputScriptUrl").value = state.scriptUrl || "";
+        const m = document.getElementById("modalSync");
+        m.classList.remove("hidden");
+        m.classList.add("flex");
+      });
+      document.getElementById("btnCloseSyncModal").addEventListener("click", () => {
+        const m = document.getElementById("modalSync");
+        m.classList.add("hidden");
+        m.classList.remove("flex");
+      });
+      document.getElementById("btnCloseAdminSlotModal").addEventListener("click", closeAdminSlotModal);
+
+      document.getElementById("btnSaveScriptUrl").addEventListener("click", () => {
+        state.scriptUrl = document.getElementById("inputScriptUrl").value.trim();
+        saveState();
+        const m = document.getElementById("modalSync");
+        m.classList.add("hidden");
+        m.classList.remove("flex");
+        showToast(state.scriptUrl ? "Google Apps Script URL saved! Portal will sync with your Google Sheet." : "Running in local browser mode.", "success");
+      });
+
+      document.getElementById("btnResetDemoData").addEventListener("click", () => {
+        try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+        state = loadState();
+        populateRollDatalist();
+        updateOverviewCounters();
+        const m = document.getElementById("modalSync");
+        m.classList.add("hidden");
+        m.classList.remove("flex");
+        showToast("Portal reset to initial Narmada Excel dataset.", "info");
+        if (currentUser) switchMainView(currentUser.role);
+      });
+    });
+  </script>
+</body>
+</html>
