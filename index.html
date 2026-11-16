@@ -2,44 +2,102 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Narmada Laundry" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <title>Narmada Hostel Laundry Portal</title>
+  <link id="pwaManifestLink" rel="manifest" href="" />
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    * {
+      font-family: 'Calibri', 'Candara', 'Segoe UI', 'Optima', Arial, sans-serif !important;
+    }
+    body {
+      background-color: #f8fafc;
+      color: #0f172a;
+      -webkit-tap-highlight-color: transparent;
+    }
     .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
     .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    .slot-card-free {
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+      border: 1.5px solid #34d399;
+      transition: all 0.16s ease;
+    }
+    .slot-card-free:hover {
+      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+      border-color: #059669;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+    }
+    .slot-card-mine {
+      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+      border: 2px solid #2563eb;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.14);
+    }
+    .slot-card-prev {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border: 1.5px solid #f59e0b;
+    }
+    .slot-card-booked {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      opacity: 0.78;
+    }
+    @keyframes drumSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .spin-slow {
+      transform-origin: 60px 68px;
+      animation: drumSpin 12s linear infinite;
+    }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col">
 
   <!-- Minimal Top Header -->
-  <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
+  <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-sm tracking-tight">
-          NH
+        <!-- Minimalist Vector Washing Machine Icon -->
+        <div class="w-9 h-9 rounded-xl bg-blue-600/20 border border-blue-500/40 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="2" width="18" height="20" rx="3" />
+            <line x1="3" y1="7" x2="21" y2="7" />
+            <circle cx="7" cy="4.5" r="0.8" fill="currentColor" />
+            <circle cx="10" cy="4.5" r="0.8" fill="currentColor" />
+            <circle cx="12" cy="14" r="4.5" />
+            <path d="M9.5 14c1-1.2 2-1.2 2.5 0s1.5 1.2 2.5 0" />
+          </svg>
         </div>
         <div>
-          <h1 class="font-bold text-sm sm:text-base tracking-tight">Narmada Hostel Laundry</h1>
-          <p id="headerStatusText" class="text-[11px] text-slate-400">Connecting to Google Sheet...</p>
+          <h1 class="font-bold text-base sm:text-lg tracking-wide leading-tight">Narmada Hostel Laundry</h1>
+          <p id="headerStatusText" class="text-xs text-slate-400">Connecting to Google Sheet...</p>
         </div>
       </div>
 
       <div class="flex items-center gap-2">
-        <button id="btnRefreshNow" type="button" class="hidden text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 transition">
-          Sync Now
+        <!-- Install as Phone Lite App Button -->
+        <button id="btnInstallApp" type="button" class="text-xs bg-blue-600 hover:bg-blue-500 text-white font-semibold px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+          <span>📲 Install App</span>
         </button>
-        <button id="btnOpenSyncModal" type="button" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-700 transition" title="Backend Connection Settings">
+
+        <button id="btnRefreshNow" type="button" class="hidden text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 transition">
+          Sync
+        </button>
+
+        <button id="btnOpenSyncModal" type="button" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-700 transition" title="Google Sheet URL Settings">
           ⚙
         </button>
+
         <div id="headerUserBox" class="hidden items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
-          <span id="headerUserLabel" class="text-xs font-medium text-slate-200"></span>
-          <button id="btnLogout" type="button" class="text-xs text-rose-400 hover:text-rose-300 font-semibold ml-1.5">
+          <span id="headerUserLabel" class="text-xs font-semibold text-slate-200"></span>
+          <button id="btnLogout" type="button" class="text-xs text-rose-400 hover:text-rose-300 font-bold ml-1.5">
             Logout
           </button>
         </div>
@@ -47,214 +105,294 @@
     </div>
   </header>
 
-  <!-- Toast Banner -->
+  <!-- Toast Notification Container -->
   <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
 
   <!-- Main Content -->
-  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8">
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-7">
 
-    <!-- ==================== VIEW 1: MINIMAL CENTERED LOGIN ==================== -->
+    <!-- ==================== VIEW 1: MINIMAL LANDING & AUTH ==================== -->
     <section id="viewAuth" class="max-w-md mx-auto">
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+
+        <!-- Minimalist Vector Washing Machine Hero Banner -->
+        <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 px-6 py-6 text-center text-white flex flex-col items-center">
+          <svg class="w-24 h-24 mb-2 drop-shadow" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Outer Machine Body -->
+            <rect x="20" y="12" width="80" height="96" rx="14" fill="#F8FAFC" stroke="#94A3B8" stroke-width="3"/>
+            <!-- Control Panel Strip -->
+            <path d="M20 26C20 18.268 26.268 12 34 12H86C93.732 12 100 18.268 100 26V34H20V26Z" fill="#E2E8F0"/>
+            <line x1="20" y1="34" x2="100" y2="34" stroke="#CBD5E1" stroke-width="2"/>
+            <!-- Soap Drawer & Dials -->
+            <rect x="28" y="20" width="20" height="7" rx="3.5" fill="#64748B"/>
+            <circle cx="76" cy="23.5" r="3.5" fill="#3B82F6"/>
+            <circle cx="87" cy="23.5" r="3.5" fill="#10B981"/>
+            <!-- Outer Drum Ring -->
+            <circle cx="60" cy="68" r="26" fill="#0F172A" stroke="#3B82F6" stroke-width="4"/>
+            <circle cx="60" cy="68" r="20" fill="#1E293B"/>
+            <!-- Animated Water & Bubbles Inside Drum -->
+            <g class="spin-slow">
+              <path d="M40 68C45 61 55 61 60 68C65 75 75 75 80 68V88H40V68Z" fill="#38BDF8" fill-opacity="0.75"/>
+              <circle cx="52" cy="58" r="3" fill="#BAE6FD"/>
+              <circle cx="67" cy="56" r="2.2" fill="#E0F2FE"/>
+              <circle cx="63" cy="77" r="2.5" fill="#E0F2FE"/>
+            </g>
+            <!-- Glass Reflection Highlight -->
+            <path d="M46 54C50 49 57 47 64 48" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-opacity="0.6"/>
+          </svg>
+          <h2 class="text-lg font-bold tracking-wide">Narmada Hostel Laundry Portal</h2>
+          <p class="text-xs text-blue-200 mt-0.5">24-Hour Automated Slot Booking &amp; Machine Tracker</p>
+        </div>
+
         <!-- Student / Admin Switch Tabs -->
         <div class="grid grid-cols-2 border-b border-slate-200 bg-slate-50">
-          <button id="tabAuthStudent" type="button" class="py-3.5 text-xs sm:text-sm font-semibold border-b-2 border-blue-600 text-blue-600 bg-white transition">
+          <button id="tabAuthStudent" type="button" class="py-3 text-sm font-bold border-b-2 border-blue-600 text-blue-600 bg-white transition">
             Student Login
           </button>
-          <button id="tabAuthAdmin" type="button" class="py-3.5 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">
+          <button id="tabAuthAdmin" type="button" class="py-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">
             Admin Login
           </button>
         </div>
 
         <!-- Student Auth Panel -->
-        <div id="panelStudentAuth" class="p-6 space-y-5">
-          <div>
-            <h2 class="text-base font-bold text-slate-900">Resident Portal</h2>
-            <p class="text-xs text-slate-500 mt-0.5">Enter your Roll Number to sign in or activate your account.</p>
-          </div>
-
+        <div id="panelStudentAuth" class="p-6 space-y-4">
           <!-- Step 1: Roll Number -->
           <div class="space-y-2">
-            <label for="inputStudentRoll" class="block text-xs font-semibold text-slate-700">Roll Number</label>
+            <label for="inputStudentRoll" class="block text-xs font-bold uppercase tracking-wider text-slate-600">Roll Number</label>
             <div class="flex gap-2">
               <input id="inputStudentRoll" type="text" autocomplete="off" placeholder="Enter your Roll Number"
                 class="flex-1 rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-blue-500" />
-              <button id="btnCheckRoll" type="button" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-4 py-2.5 rounded-xl transition shrink-0">
+              <button id="btnCheckRoll" type="button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition shrink-0">
                 Continue
               </button>
             </div>
           </div>
 
-          <!-- Step 2A: First-Time Registration + Email OTP Verification -->
-          <div id="boxFirstTimeSetup" class="hidden space-y-4 pt-3 border-t border-slate-100">
+          <!-- Step 2A: First-Time Registration + Email OTP -->
+          <div id="boxFirstTimeSetup" class="hidden space-y-3.5 pt-3 border-t border-slate-100">
             <div class="p-3 rounded-xl bg-blue-50 border border-blue-200">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-blue-700">First-Time Registration</span>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-blue-700">First-Time Setup</span>
               <p id="setupStudentName" class="text-sm font-bold text-slate-900 mt-0.5"></p>
               <p id="setupStudentMeta" class="text-xs text-slate-600"></p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label for="inputVerifyRoom" class="block text-xs font-semibold text-slate-700 mb-1">Room Number</label>
+                <label for="inputVerifyRoom" class="block text-xs font-bold text-slate-700 mb-1">Room Number</label>
                 <input id="inputVerifyRoom" type="number" placeholder="Room No"
                   class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
               <div>
-                <label for="inputSetupPhone" class="block text-xs font-semibold text-slate-700 mb-1">Phone Number</label>
+                <label for="inputSetupPhone" class="block text-xs font-bold text-slate-700 mb-1">Phone Number</label>
                 <input id="inputSetupPhone" type="tel" placeholder="10-digit mobile"
                   class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
             </div>
 
             <div>
-              <label for="inputSetupEmail" class="block text-xs font-semibold text-slate-700 mb-1">Email Address (for OTP &amp; Alerts)</label>
+              <label for="inputSetupEmail" class="block text-xs font-bold text-slate-700 mb-1">Email Address (for OTP &amp; 5-Min Alerts)</label>
               <div class="flex gap-2">
                 <input id="inputSetupEmail" type="email" placeholder="rollno@smail.iitm.ac.in"
                   class="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                <button id="btnSendOtp" type="button" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs px-3.5 py-2 rounded-xl transition shrink-0">
+                <button id="btnSendOtp" type="button" class="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition shrink-0">
                   Send OTP
                 </button>
               </div>
             </div>
 
-            <!-- OTP & Password Box (Enabled once OTP is sent) -->
             <div id="otpVerificationStep" class="hidden space-y-3 pt-2 border-t border-slate-100">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label for="inputSetupOtp" class="block text-xs font-semibold text-slate-700 mb-1">6-Digit Email OTP</label>
+                  <label for="inputSetupOtp" class="block text-xs font-bold text-slate-700 mb-1">6-Digit Email OTP</label>
                   <input id="inputSetupOtp" type="text" maxlength="6" placeholder="123456"
-                    class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-mono tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div>
-                  <label for="inputSetupPassword" class="block text-xs font-semibold text-slate-700 mb-1">Create Password</label>
+                  <label for="inputSetupPassword" class="block text-xs font-bold text-slate-700 mb-1">Create Password</label>
                   <input id="inputSetupPassword" type="password" placeholder="Min 4 chars"
                     class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
               </div>
 
-              <button id="btnCompleteSetup" type="button" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl text-sm transition">
-                Verify OTP &amp; Create Account
+              <button id="btnCompleteSetup" type="button" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-sm transition">
+                Verify OTP &amp; Activate Account
               </button>
             </div>
           </div>
 
           <!-- Step 2B: Returning Student Password Login -->
-          <div id="boxReturningLogin" class="hidden space-y-4 pt-3 border-t border-slate-100">
+          <div id="boxReturningLogin" class="hidden space-y-3.5 pt-3 border-t border-slate-100">
             <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
               <div>
-                <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Registered Resident</span>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Registered Resident</span>
                 <p id="loginStudentName" class="text-sm font-bold text-slate-900"></p>
               </div>
-              <button id="btnChangeRoll" type="button" class="text-xs text-blue-600 hover:underline font-medium">Change</button>
+              <button id="btnChangeRoll" type="button" class="text-xs text-blue-600 hover:underline font-bold">Change</button>
             </div>
 
             <div>
-              <label for="inputLoginPassword" class="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+              <div class="flex items-center justify-between mb-1">
+                <label for="inputLoginPassword" class="block text-xs font-bold text-slate-700">Password</label>
+                <button id="btnOpenStuForgotModal" type="button" class="text-xs text-blue-600 hover:underline font-semibold">
+                  Forgot Password?
+                </button>
+              </div>
               <input id="inputLoginPassword" type="password" placeholder="Enter your password"
                 class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
 
-            <button id="btnStudentSignIn" type="button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-sm transition">
+            <button id="btnStudentSignIn" type="button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-sm transition">
               Sign In
             </button>
           </div>
         </div>
 
-        <!-- Admin Auth Panel (Clean, No Pre-filled Values) -->
+        <!-- Admin Auth Panel -->
         <div id="panelAdminAuth" class="hidden p-6 space-y-4">
-          <div>
-            <h2 class="text-base font-bold text-slate-900">Admin Login</h2>
-          </div>
-
           <div class="space-y-3.5">
             <div>
-              <label for="inputAdminUser" class="block text-xs font-semibold text-slate-700 mb-1">Username</label>
+              <label for="inputAdminUser" class="block text-xs font-bold text-slate-700 mb-1">Admin Username</label>
               <input id="inputAdminUser" type="text" autocomplete="off" placeholder="Enter admin username"
                 class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
             <div>
-              <label for="inputAdminPass" class="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+              <div class="flex items-center justify-between mb-1">
+                <label for="inputAdminPass" class="block text-xs font-bold text-slate-700">Admin Password</label>
+                <button id="btnOpenAdmForgotModal" type="button" class="text-xs text-blue-600 hover:underline font-semibold">
+                  Forgot Admin Password?
+                </button>
+              </div>
               <input id="inputAdminPass" type="password" autocomplete="off" placeholder="Enter admin password"
                 class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
-            <button id="btnAdminSignIn" type="button" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 rounded-xl text-sm transition">
+            <button id="btnAdminSignIn" type="button" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-sm transition">
               Sign In as Admin
             </button>
           </div>
         </div>
+
       </div>
     </section>
 
     <!-- ==================== VIEW 2: STUDENT PORTAL ==================== -->
     <section id="viewStudent" class="hidden space-y-6">
 
-      <!-- Student Bar -->
+      <!-- Student Top Navigation Bar -->
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <div class="flex items-center gap-2">
             <span id="stuBadgeRoll" class="text-xs font-bold uppercase px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800"></span>
-            <span id="stuBadgeRoom" class="text-xs font-medium text-slate-500"></span>
+            <span id="stuBadgeRoom" class="text-xs font-semibold text-slate-500"></span>
           </div>
           <h2 id="stuWelcomeTitle" class="text-base font-bold text-slate-900 mt-1"></h2>
         </div>
 
-        <div class="flex items-center gap-2">
-          <button id="tabStuBook" type="button" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-blue-600 text-white transition">
+        <div class="flex items-center gap-2 flex-wrap">
+          <button id="tabStuBook" type="button" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white transition">
             Book Slot
           </button>
-          <button id="tabStuComplaint" type="button" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+          <button id="tabStuMyBookings" type="button" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+            My Bookings &amp; History (<span id="stuActiveQuotaBadge">0/2</span>)
+          </button>
+          <button id="tabStuComplaint" type="button" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
             Report Issue
           </button>
         </div>
       </div>
 
-      <!-- My Active Booking Summary Card -->
-      <div id="stuActiveBookingContainer"></div>
-
-      <!-- Student Tab 1: Select Day & Floor -> View RR Machine Slot Availability -->
+      <!-- Student Tab 1: Book Slot (7-Day Selector + Floor Selector + Go Button) -->
       <div id="panelStuBook" class="space-y-5">
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Step 1: Select Day -->
-            <div>
-              <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">1. Select Booking Day</label>
-              <div class="grid grid-cols-2 gap-2">
-                <button id="btnDateToday" type="button" class="py-2.5 px-3 rounded-xl text-xs font-semibold border transition"></button>
-                <button id="btnDateTomorrow" type="button" class="py-2.5 px-3 rounded-xl text-xs font-semibold border transition"></button>
-              </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-3.5 items-end">
+            <!-- Next 7 Days Selector (Showing Day & Date) -->
+            <div class="sm:col-span-5">
+              <label for="stuSelectDate" class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+                1. Select Day &amp; Date (Next 7 Days)
+              </label>
+              <select id="stuSelectDate" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"></select>
             </div>
 
-            <!-- Step 2: Select Floor -->
-            <div>
-              <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">2. Select Hostel Floor</label>
-              <div class="grid grid-cols-4 gap-2" id="stuFloorTabs">
-                <button type="button" data-floor="0" class="stu-floor-btn py-2.5 px-2 rounded-xl text-xs font-semibold border transition">Floor 0</button>
-                <button type="button" data-floor="1" class="stu-floor-btn py-2.5 px-2 rounded-xl text-xs font-semibold border transition">Floor 1</button>
-                <button type="button" data-floor="2" class="stu-floor-btn py-2.5 px-2 rounded-xl text-xs font-semibold border transition">Floor 2</button>
-                <button type="button" data-floor="3" class="stu-floor-btn py-2.5 px-2 rounded-xl text-xs font-semibold border transition">Floor 3</button>
-              </div>
+            <!-- Hostel Floor Selector -->
+            <div class="sm:col-span-5">
+              <label for="stuSelectFloor" class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+                2. Select Hostel Floor
+              </label>
+              <select id="stuSelectFloor" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="0">Ground Floor (Floor 0)</option>
+                <option value="1">First Floor (Floor 1)</option>
+                <option value="2">Second Floor (Floor 2)</option>
+                <option value="3">Third Floor (Floor 3)</option>
+              </select>
+            </div>
+
+            <!-- GO Button -->
+            <div class="sm:col-span-2">
+              <button id="btnStuGoSlots" type="button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl text-sm shadow-sm transition">
+                Go →
+              </button>
             </div>
           </div>
 
-          <!-- RR Machine Availability Summary Cards on Selected Floor & Day -->
-          <div id="stuFloorAvailabilityBar" class="pt-3 border-t border-slate-100"></div>
+          <!-- Color Legend -->
+          <div id="stuSlotLegend" class="hidden pt-3 border-t border-slate-100 flex flex-wrap items-center gap-4 text-xs text-slate-600">
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-200 border border-emerald-500 inline-block"></span> Free Slot (Click to Book)</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-blue-200 border border-blue-600 inline-block"></span> Your Active Booking</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-200 border border-amber-500 inline-block"></span> Previous User (Room &amp; Phone Visible)</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-slate-200 border border-slate-400 inline-block"></span> Booked</span>
+          </div>
         </div>
 
-        <!-- RR Machines & Slot Cards for Selected Floor -->
-        <div id="stuMachinesGrid" class="space-y-4"></div>
+        <!-- Prompt Before Clicking Go / Slot Cards Container -->
+        <div id="stuMachinesGrid" class="space-y-4">
+          <div class="bg-white rounded-2xl border border-slate-200 p-8 text-center text-sm text-slate-500">
+            Select your preferred <strong>Day &amp; Date</strong> and <strong>Hostel Floor</strong> above, then click <strong>Go →</strong> to view machine slot details.
+          </div>
+        </div>
       </div>
 
-      <!-- Student Tab 2: Maintenance & Complaints -->
+      <!-- Student Tab 2: My Bookings (Limit of 2 + Remaining Quota) & Complete Booking History -->
+      <div id="panelStuMyBookings" class="hidden space-y-6">
+
+        <!-- Remaining Slot Quota Banner (Limit: 2 Active Bookings) -->
+        <div id="stuQuotaBanner" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5"></div>
+
+        <!-- Active Upcoming Bookings (Up to 2) + Previous User Contact Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
+          <h3 class="text-base font-bold text-slate-900">My Active Upcoming Bookings</h3>
+          <div id="stuActiveBookingsList" class="space-y-3"></div>
+        </div>
+
+        <!-- Past & Cancelled Booking History -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
+          <h3 class="text-base font-bold text-slate-900">My Booking History</h3>
+          <div class="overflow-x-auto custom-scroll">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-slate-200 text-slate-500 uppercase">
+                  <th class="py-2.5 px-3">Date</th>
+                  <th class="py-2.5 px-3">Machine &amp; Floor</th>
+                  <th class="py-2.5 px-3">Slot &amp; Timing</th>
+                  <th class="py-2.5 px-3">Status</th>
+                  <th class="py-2.5 px-3">Booked At</th>
+                </tr>
+              </thead>
+              <tbody id="stuHistoryTableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Student Tab 3: Report Maintenance / Issue -->
       <div id="panelStuComplaint" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div class="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
-          <h3 class="text-sm font-bold text-slate-900">Report a Machine Issue</h3>
+          <h3 class="text-base font-bold text-slate-900">Raise a Maintenance Request</h3>
           <div class="space-y-3">
             <div>
-              <label for="inputCompMachine" class="block text-xs font-semibold text-slate-700 mb-1">Rest Room Machine</label>
+              <label for="inputCompMachine" class="block text-xs font-bold text-slate-700 mb-1">Rest Room Machine</label>
               <select id="inputCompMachine" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"></select>
             </div>
             <div>
-              <label for="inputCompType" class="block text-xs font-semibold text-slate-700 mb-1">Issue Type</label>
+              <label for="inputCompType" class="block text-xs font-bold text-slate-700 mb-1">Issue Category</label>
               <select id="inputCompType" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
                 <option value="Drainage / Spin Issue">Drainage / Spin Issue</option>
                 <option value="Power / Machine Won't Start">Power / Machine Won't Start</option>
@@ -264,18 +402,18 @@
               </select>
             </div>
             <div>
-              <label for="inputCompDesc" class="block text-xs font-semibold text-slate-700 mb-1">Description</label>
-              <textarea id="inputCompDesc" rows="3" placeholder="Describe the issue..."
+              <label for="inputCompDesc" class="block text-xs font-bold text-slate-700 mb-1">Description</label>
+              <textarea id="inputCompDesc" rows="3" placeholder="Describe the problem..."
                 class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"></textarea>
             </div>
-            <button id="btnSubmitComplaint" type="button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-sm transition">
-              Submit Complaint
+            <button id="btnSubmitComplaint" type="button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-sm transition">
+              Submit Request
             </button>
           </div>
         </div>
 
         <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-3">
-          <h3 class="text-sm font-bold text-slate-900">My Reported Issues</h3>
+          <h3 class="text-base font-bold text-slate-900">My Maintenance Requests</h3>
           <div id="stuComplaintsList" class="space-y-2.5"></div>
         </div>
       </div>
@@ -289,23 +427,23 @@
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 class="text-base font-bold text-slate-900">Admin Control Panel</h2>
-          <p class="text-xs text-slate-500">Live Google Sheet Database Management</p>
+          <p class="text-xs text-slate-500">Real-Time Google Sheet Management</p>
         </div>
 
         <div class="flex flex-wrap items-center gap-1.5">
-          <button type="button" data-admin-tab="bookings" class="admin-tab-btn px-3 py-2 rounded-xl text-xs font-semibold bg-slate-900 text-white">
+          <button type="button" data-admin-tab="bookings" class="admin-tab-btn px-3 py-2 rounded-xl text-xs font-bold bg-slate-900 text-white">
             Bookings &amp; Slots
           </button>
-          <button type="button" data-admin-tab="machines" class="admin-tab-btn px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">
+          <button type="button" data-admin-tab="complaints" class="admin-tab-btn px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">
+            Maintenance Requests (<span id="adminOpenCompBadge">0</span>)
+          </button>
+          <button type="button" data-admin-tab="machines" class="admin-tab-btn px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">
             Machines
           </button>
-          <button type="button" data-admin-tab="complaints" class="admin-tab-btn px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">
-            Complaints (<span id="adminOpenCompBadge">0</span>)
-          </button>
-          <button type="button" data-admin-tab="students" class="admin-tab-btn px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">
+          <button type="button" data-admin-tab="students" class="admin-tab-btn px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">
             Students (<span id="adminStuTabBadge">0</span>)
           </button>
-          <button type="button" data-admin-tab="security" class="admin-tab-btn px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">
+          <button type="button" data-admin-tab="security" class="admin-tab-btn px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">
             Admin Password
           </button>
         </div>
@@ -315,10 +453,10 @@
       <div id="adminPanelBookings" class="space-y-5">
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3">
           <div class="flex flex-wrap items-center gap-3">
-            <label for="adminDateInput" class="text-xs font-semibold text-slate-600">Date:</label>
+            <label for="adminDateInput" class="text-xs font-bold text-slate-600">Date:</label>
             <input id="adminDateInput" type="date" min="2026-11-01"
-              class="rounded-xl border border-slate-300 px-3 py-1.5 text-xs font-semibold" />
-            <select id="adminFloorFilter" class="rounded-xl border border-slate-300 px-3 py-1.5 text-xs font-semibold">
+              class="rounded-xl border border-slate-300 px-3 py-1.5 text-xs font-bold" />
+            <select id="adminFloorFilter" class="rounded-xl border border-slate-300 px-3 py-1.5 text-xs font-bold">
               <option value="0">Floor 0</option>
               <option value="1">Floor 1</option>
               <option value="2">Floor 2</option>
@@ -326,10 +464,9 @@
               <option value="ALL">All Floors (0–3)</option>
             </select>
           </div>
-          <span id="adminTotalBookingsBadge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700"></span>
+          <span id="adminTotalBookingsBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700"></span>
         </div>
 
-        <!-- Active Bookings Table -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-3">
           <h3 class="text-sm font-bold text-slate-900">All Active Bookings</h3>
           <div class="overflow-x-auto custom-scroll">
@@ -348,63 +485,65 @@
           </div>
         </div>
 
-        <!-- Admin Visual Slot Grid -->
         <div id="adminMachinesGrid" class="space-y-4"></div>
       </div>
 
-      <!-- Admin Tab 2: Machine Health & Cycle Controls -->
+      <!-- Admin Tab 2: Student Maintenance Requests & Direct Machine Actions -->
+      <div id="adminPanelComplaints" class="hidden space-y-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Maintenance &amp; Issues Raised by Students</h3>
+            <p class="text-xs text-slate-500">Take action directly: update ticket status, save resolution notes, or toggle the reported machine between Healthy and Sick.</p>
+          </div>
+          <div id="adminComplaintsContainer" class="space-y-3"></div>
+        </div>
+      </div>
+
+      <!-- Admin Tab 3: Machine Health & Cycle Controls -->
       <div id="adminPanelMachines" class="hidden space-y-4">
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
           <div>
-            <h3 class="text-sm font-bold text-slate-900">Washing Machine Health &amp; Run Time</h3>
+            <h3 class="text-base font-bold text-slate-900">Washing Machine Fleet &amp; Run Times</h3>
             <p class="text-xs text-slate-500">Marking a machine as Sick hides its slots from students and releases any active bookings on that machine.</p>
           </div>
           <div id="adminFleetCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </div>
       </div>
 
-      <!-- Admin Tab 3: Complaints -->
-      <div id="adminPanelComplaints" class="hidden space-y-4">
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
-          <h3 class="text-sm font-bold text-slate-900">Maintenance &amp; Complaint Tickets</h3>
-          <div id="adminComplaintsContainer" class="space-y-3"></div>
-        </div>
-      </div>
-
-      <!-- Admin Tab 4: Student Database (Fetched Live from Sheet) -->
+      <!-- Admin Tab 4: Student Database -->
       <div id="adminPanelStudents" class="hidden space-y-5">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div class="lg:col-span-4 bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-3 h-fit">
             <h3 class="text-sm font-bold text-slate-900">Add / Edit Student in Sheet</h3>
             <div>
-              <label for="admStuRoll" class="block text-xs font-semibold text-slate-700 mb-1">Roll Number</label>
+              <label for="admStuRoll" class="block text-xs font-bold text-slate-700 mb-1">Roll Number</label>
               <input id="admStuRoll" type="text" placeholder="e.g. CS23B006" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs uppercase" />
             </div>
             <div>
-              <label for="admStuName" class="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
+              <label for="admStuName" class="block text-xs font-bold text-slate-700 mb-1">Full Name</label>
               <input id="admStuName" type="text" placeholder="Student Name" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
             </div>
             <div class="grid grid-cols-2 gap-2.5">
               <div>
-                <label for="admStuRoom" class="block text-xs font-semibold text-slate-700 mb-1">Room No</label>
+                <label for="admStuRoom" class="block text-xs font-bold text-slate-700 mb-1">Room No</label>
                 <input id="admStuRoom" type="number" placeholder="102" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
               </div>
               <div>
-                <label for="admStuProgram" class="block text-xs font-semibold text-slate-700 mb-1">Program</label>
+                <label for="admStuProgram" class="block text-xs font-bold text-slate-700 mb-1">Program</label>
                 <input id="admStuProgram" type="text" placeholder="B.Tech-23" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
               </div>
             </div>
             <div class="grid grid-cols-2 gap-2.5">
               <div>
-                <label for="admStuPhone" class="block text-xs font-semibold text-slate-700 mb-1">Phone</label>
+                <label for="admStuPhone" class="block text-xs font-bold text-slate-700 mb-1">Phone</label>
                 <input id="admStuPhone" type="tel" placeholder="9876543210" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
               </div>
               <div>
-                <label for="admStuEmail" class="block text-xs font-semibold text-slate-700 mb-1">Email</label>
+                <label for="admStuEmail" class="block text-xs font-bold text-slate-700 mb-1">Email</label>
                 <input id="admStuEmail" type="email" placeholder="student@smail.iitm.ac.in" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
               </div>
             </div>
-            <button id="btnAdminSaveStudent" type="button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-xl text-xs transition">
+            <button id="btnAdminSaveStudent" type="button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-xl text-xs transition">
               Save to Google Sheet
             </button>
           </div>
@@ -436,26 +575,26 @@
         </div>
       </div>
 
-      <!-- Admin Tab 5: Change Admin Credentials in Google Sheet -->
+      <!-- Admin Tab 5: Update Admin Credentials -->
       <div id="adminPanelSecurity" class="hidden max-w-md mx-auto">
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
           <div>
-            <h3 class="text-sm font-bold text-slate-900">Update Admin Credentials</h3>
+            <h3 class="text-base font-bold text-slate-900">Update Admin Credentials</h3>
             <p class="text-xs text-slate-500 mt-0.5">Updates the <code class="font-mono">Admins</code> tab in your Google Sheet immediately.</p>
           </div>
           <div>
-            <label for="admNewUsername" class="block text-xs font-semibold text-slate-700 mb-1">Admin Username</label>
+            <label for="admNewUsername" class="block text-xs font-bold text-slate-700 mb-1">Admin Username</label>
             <input id="admNewUsername" type="text" value="admin" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
           </div>
           <div>
-            <label for="admCurrentPassword" class="block text-xs font-semibold text-slate-700 mb-1">Current Password</label>
+            <label for="admCurrentPassword" class="block text-xs font-bold text-slate-700 mb-1">Current Password</label>
             <input id="admCurrentPassword" type="password" placeholder="Enter current password" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
           </div>
           <div>
-            <label for="admNewPassword" class="block text-xs font-semibold text-slate-700 mb-1">New Password</label>
+            <label for="admNewPassword" class="block text-xs font-bold text-slate-700 mb-1">New Password</label>
             <input id="admNewPassword" type="password" placeholder="Enter new password (min 4 chars)" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
           </div>
-          <button id="btnUpdateAdminCreds" type="button" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 rounded-xl text-sm transition">
+          <button id="btnUpdateAdminCreds" type="button" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-sm transition">
             Update Admin Password
           </button>
         </div>
@@ -465,29 +604,151 @@
 
   </main>
 
-  <!-- ==================== MODAL 1: STUDENT BOOKING CONFIRMATION POP-UP ==================== -->
+  <!-- ==================== MODAL 1: BOOKING CONFIRMATION POP-UP ==================== -->
   <div id="modalConfirmBooking" class="fixed inset-0 bg-slate-900/60 z-40 hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-xl border border-slate-200">
       <div class="flex items-center justify-between">
         <h3 class="text-base font-bold text-slate-900">Confirm Slot Booking</h3>
         <button id="btnCloseBookingModal" type="button" class="text-slate-400 hover:text-slate-600 text-sm font-bold px-2 py-1">✕</button>
       </div>
-      <div id="modalConfirmBookingDetails" class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5 text-xs text-slate-700"></div>
-      <p class="text-[11px] text-slate-500">
-        Your slot is confirmed immediately upon clicking Confirm. You can hold at most 1 active upcoming booking at a time.
+      <div id="modalConfirmBookingDetails" class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 space-y-1.5 text-xs text-slate-800"></div>
+      <p class="text-xs text-slate-500">
+        Your booking is confirmed immediately. You will receive an email reminder 5 minutes before your slot starts and 5 minutes before it ends.
       </p>
       <div class="flex items-center justify-end gap-2 pt-1">
-        <button id="btnCancelBookingModal" type="button" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700">
-          Cancel
+        <button id="btnCancelBookingModal" type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700">
+          Back
         </button>
-        <button id="btnConfirmBookingSubmit" type="button" class="px-4 py-2 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white">
+        <button id="btnConfirmBookingSubmit" type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white">
           Confirm Booking
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ==================== MODAL 2: ADMIN SLOT MANAGEMENT ==================== -->
+  <!-- ==================== MODAL 2: CANCEL BOOKING CONFIRMATION POP-UP ==================== -->
+  <div id="modalConfirmCancel" class="fixed inset-0 bg-slate-900/60 z-40 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-xl border border-slate-200">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-rose-700">Cancel Laundry Booking?</h3>
+        <button id="btnCloseCancelModal" type="button" class="text-slate-400 hover:text-slate-600 text-sm font-bold px-2 py-1">✕</button>
+      </div>
+      <div id="modalConfirmCancelDetails" class="p-3.5 rounded-xl bg-rose-50 border border-rose-200 space-y-1 text-xs text-slate-800"></div>
+      <p class="text-xs text-slate-500">
+        Once cancelled, this slot will immediately become Free for other residents to book.
+      </p>
+      <div class="flex items-center justify-end gap-2 pt-1">
+        <button id="btnKeepSlotModal" type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700">
+          Keep Slot
+        </button>
+        <button id="btnConfirmCancelSubmit" type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white">
+          Yes, Cancel Booking
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 3: STUDENT FORGOT PASSWORD ==================== -->
+  <div id="modalStuForgot" class="fixed inset-0 bg-slate-900/60 z-40 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-xl border border-slate-200">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-slate-900">Reset Student Password</h3>
+        <button id="btnCloseStuForgotModal" type="button" class="text-slate-400 hover:text-slate-600 text-sm font-bold px-2 py-1">✕</button>
+      </div>
+      <p class="text-xs text-slate-500">Verify your Roll Number and Room Number to receive a 6-digit password reset OTP via email.</p>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Roll Number</label>
+          <input id="stuResetRoll" type="text" placeholder="e.g. HS22H059" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm uppercase" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Room Number</label>
+          <div class="flex gap-2">
+            <input id="stuResetRoom" type="number" placeholder="Room No" class="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+            <button id="btnSendStuResetOtp" type="button" class="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-3.5 py-2 rounded-xl shrink-0">
+              Send OTP
+            </button>
+          </div>
+        </div>
+        <div id="stuResetStep2" class="hidden space-y-3 pt-2 border-t border-slate-100">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">6-Digit Email OTP</label>
+            <input id="stuResetOtp" type="text" maxlength="6" placeholder="123456" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm tracking-widest" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">New Password</label>
+            <input id="stuResetNewPass" type="password" placeholder="Min 4 chars" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+          </div>
+          <button id="btnConfirmStuReset" type="button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-sm">
+            Reset Password
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 4: ADMIN FORGOT PASSWORD ==================== -->
+  <div id="modalAdmForgot" class="fixed inset-0 bg-slate-900/60 z-40 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-xl border border-slate-200">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-slate-900">Reset Admin Password</h3>
+        <button id="btnCloseAdmForgotModal" type="button" class="text-slate-400 hover:text-slate-600 text-sm font-bold px-2 py-1">✕</button>
+      </div>
+      <p class="text-xs text-slate-500">Sends a 6-digit Reset OTP to the Google Sheet owner's Gmail account.</p>
+      <div class="space-y-3">
+        <div class="flex gap-2">
+          <input id="admResetUser" type="text" value="admin" placeholder="Admin username" class="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+          <button id="btnSendAdmResetOtp" type="button" class="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-3.5 py-2 rounded-xl shrink-0">
+            Email Owner OTP
+          </button>
+        </div>
+        <div id="admResetStep2" class="hidden space-y-3 pt-2 border-t border-slate-100">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">6-Digit Owner OTP</label>
+            <input id="admResetOtp" type="text" maxlength="6" placeholder="123456" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm tracking-widest" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">New Admin Password</label>
+            <input id="admResetNewPass" type="password" placeholder="Min 4 chars" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+          </div>
+          <button id="btnConfirmAdmReset" type="button" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-sm">
+            Save New Admin Password
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 5: INSTALL LITE APP ON PHONE ==================== -->
+  <div id="modalInstallApp" class="fixed inset-0 bg-slate-900/60 z-40 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-xl border border-slate-200">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-slate-900">Install as Phone Lite App</h3>
+        <button id="btnCloseInstallModal" type="button" class="text-slate-400 hover:text-slate-600 text-sm font-bold px-2 py-1">✕</button>
+      </div>
+      <div class="space-y-3 text-xs text-slate-700">
+        <div class="p-3 rounded-xl bg-blue-50 border border-blue-200">
+          <p class="font-bold text-blue-900">On Android (Chrome / Edge / Brave):</p>
+          <p class="mt-0.5">Tap the browser menu (<strong>⋮</strong>) at the top-right and select <strong>"Add to Home screen"</strong> or <strong>"Install app"</strong>.</p>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-100 border border-slate-200">
+          <p class="font-bold text-slate-900">On iPhone / iPad (Safari):</p>
+          <p class="mt-0.5">Tap the <strong>Share</strong> icon at the bottom of Safari and tap <strong>"Add to Home Screen"</strong>.</p>
+        </div>
+        <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between gap-2">
+          <div>
+            <p class="font-bold text-emerald-900">Phone App Notifications</p>
+            <p class="text-[11px] text-emerald-800">Get 5-min pre-start &amp; pre-end alerts on your device</p>
+          </div>
+          <button id="btnRequestDeviceNotif" type="button" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shrink-0">
+            Allow Alerts
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 6: ADMIN SLOT MANAGEMENT ==================== -->
   <div id="modalAdminSlot" class="fixed inset-0 bg-slate-900/60 z-40 hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl border border-slate-200">
       <div class="flex items-center justify-between">
@@ -498,7 +759,7 @@
     </div>
   </div>
 
-  <!-- ==================== MODAL 3: GOOGLE SHEET URL SETTINGS ==================== -->
+  <!-- ==================== MODAL 7: GOOGLE SHEET URL SETTINGS ==================== -->
   <div id="modalSync" class="fixed inset-0 bg-slate-900/60 z-40 hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl border border-slate-200">
       <div class="flex items-center justify-between">
@@ -506,12 +767,12 @@
         <button id="btnCloseSyncModal" type="button" class="text-slate-400 hover:text-slate-600 text-sm font-bold px-2 py-1">✕</button>
       </div>
       <div>
-        <label for="inputScriptUrl" class="block text-xs font-semibold text-slate-700 mb-1">Google Apps Script Web App URL (<code class="font-mono">/exec</code>)</label>
+        <label for="inputScriptUrl" class="block text-xs font-bold text-slate-700 mb-1">Google Apps Script Web App URL (<code class="font-mono">/exec</code>)</label>
         <input id="inputScriptUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec"
           class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-xs font-mono" />
       </div>
       <div class="flex items-center justify-end gap-2 pt-2">
-        <button id="btnSaveScriptUrl" type="button" class="px-4 py-2 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white">
+        <button id="btnSaveScriptUrl" type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white">
           Save URL &amp; Reconnect
         </button>
       </div>
@@ -520,12 +781,93 @@
 
   <script>
     // =========================================================================
-    // LIVE GOOGLE APPS SCRIPT CONNECTION & DYNAMIC DATE ENGINE
+    // 1. LITE APP (PWA) MANIFEST & NATIVE NOTIFICATION ENGINE
     // =========================================================================
+    const PORTAL_PUBLIC_URL = "https://sreeram1cv.github.io/dhobi-abhi/";
     const DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwD7V6a7hGCa_Xbyu-UxZN2VxwPEj01vtUPa6HUBRYN3jHieSQZ8Ryb1Uncrx7bWPU68A/exec";
-    const URL_STORAGE_KEY = "narmada_laundry_script_url_v2";
-    const SESSION_STORAGE_KEY = "narmada_laundry_session_v2";
+    const URL_STORAGE_KEY = "narmada_laundry_script_url_v3";
+    const SESSION_STORAGE_KEY = "narmada_laundry_session_v3";
+    const MAX_ACTIVE_SLOTS = 2;
 
+    let deferredInstallPrompt = null;
+    const firedDeviceAlerts = {};
+
+    function setupPwaLiteApp() {
+      try {
+        const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="40" fill="#0f172a"/><rect x="36" y="28" width="120" height="136" rx="18" fill="#f8fafc"/><circle cx="96" cy="104" r="38" fill="#1d4ed8"/><circle cx="96" cy="104" r="28" fill="#38bdf8"/></svg>`;
+        const iconDataUrl = "data:image/svg+xml;utf8," + encodeURIComponent(iconSvg);
+        const manifestObj = {
+          name: "Narmada Hostel Laundry Portal",
+          short_name: "Narmada Laundry",
+          start_url: PORTAL_PUBLIC_URL,
+          display: "standalone",
+          background_color: "#0f172a",
+          theme_color: "#0f172a",
+          icons: [{ src: iconDataUrl, sizes: "192x192", type: "image/svg+xml", purpose: "any maskable" }]
+        };
+        const blob = new Blob([JSON.stringify(manifestObj)], { type: "application/manifest+json" });
+        document.getElementById("pwaManifestLink").setAttribute("href", URL.createObjectURL(blob));
+      } catch (e) {}
+
+      window.addEventListener("beforeinstallprompt", e => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+      });
+    }
+
+    function checkLocalDeviceNotifications() {
+      if (!currentUser || currentUser.role !== "student") return;
+      const stuRoll = currentUser.data.rollNo.toUpperCase();
+      const todayStr = getLocalDateString(0);
+      const now = new Date();
+      const nowMins = now.getHours() * 60 + now.getMinutes();
+
+      state.bookings.forEach(b => {
+        if (b.status !== "ACTIVE" || b.rollNo.toUpperCase() !== stuRoll || b.date !== todayStr) return;
+        const parts = String(b.slotTiming || "").split("-").map(x => x.trim());
+        if (parts.length !== 2) return;
+        const startMins = parseHHMM(parts[0]);
+        const endMins = parts[1] === "24:00" ? 1440 : parseHHMM(parts[1]);
+
+        const minsToStart = startMins - nowMins;
+        const startKey = b.bookingId + "_START";
+        if (minsToStart > 0 && minsToStart <= 5 && !firedDeviceAlerts[startKey]) {
+          firedDeviceAlerts[startKey] = true;
+          triggerPhoneNotification(
+            "Laundry Slot Starting in 5 Mins (" + b.machineId + ")",
+            "Get ready to load your clothes in " + b.machineId + " (" + b.slotTiming + "). Planning to cancel? Cancel right now in the app!"
+          );
+        }
+
+        const minsToEnd = endMins - nowMins;
+        const endKey = b.bookingId + "_END";
+        if (minsToEnd > 0 && minsToEnd <= 5 && !firedDeviceAlerts[endKey]) {
+          firedDeviceAlerts[endKey] = true;
+          triggerPhoneNotification(
+            "Wash Finishing in 5 Mins (" + b.machineId + ")",
+            "Your cycle on " + b.machineId + " (" + b.slotTiming + ") ends in 5 minutes. Please get ready to take out your clothes!"
+          );
+        }
+      });
+    }
+
+    function triggerPhoneNotification(title, bodyText) {
+      showToast(title + " — " + bodyText, "warn");
+      try {
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification(title, { body: bodyText });
+        }
+      } catch (e) {}
+    }
+
+    function parseHHMM(s) {
+      const p = String(s).split(":");
+      return Number(p[0]) * 60 + Number(p[1] || 0);
+    }
+
+    // =========================================================================
+    // 2. NEXT 7 DAYS DATE ENGINE (SHOWING DAY & DATE INCLUDING TODAY)
+    // =========================================================================
     function getLocalDateString(offsetDays = 0) {
       const d = new Date();
       d.setDate(d.getDate() + offsetDays);
@@ -535,18 +877,34 @@
       return yyyy + "-" + mm + "-" + dd;
     }
 
-    function formatDisplayDate(yyyyMmDd) {
+    function formatDayAndDate(yyyyMmDd) {
       const parts = String(yyyyMmDd).split("-");
       if (parts.length !== 3) return yyyyMmDd;
+      const dt = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
       const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      const mIdx = Number(parts[1]) - 1;
-      return (months[mIdx] || parts[1]) + " " + Number(parts[2]);
+      const todayStr = getLocalDateString(0);
+      const tomorrowStr = getLocalDateString(1);
+      let suffix = "";
+      if (yyyyMmDd === todayStr) suffix = " (Today)";
+      else if (yyyyMmDd === tomorrowStr) suffix = " (Tomorrow)";
+      return days[dt.getDay()] + ", " + months[dt.getMonth()] + " " + dt.getDate() + suffix;
     }
 
-    const TODAY_STR = getLocalDateString(0);
-    const TOMORROW_STR = getLocalDateString(1);
+    function populateSevenDaysSelect() {
+      const sel = document.getElementById("stuSelectDate");
+      if (!sel) return;
+      const options = [];
+      for (let i = 0; i < 7; i++) {
+        const dStr = getLocalDateString(i);
+        options.push('<option value="' + dStr + '">' + formatDayAndDate(dStr) + '</option>');
+      }
+      sel.innerHTML = options.join("");
+    }
 
-    // Minimal fallback machine structure ONLY used if the initial Google Sheet fetch is still loading
+    // =========================================================================
+    // 3. STATE & LIVE GOOGLE SHEET API
+    // =========================================================================
     const FALLBACK_MACHINES = [
       { floor: 0, id: "RR1", cycleMins: 80, numMachines: 1, status: "Healthy" },
       { floor: 0, id: "RR2", cycleMins: 80, numMachines: 1, status: "Sick" },
@@ -573,8 +931,9 @@
       scriptUrl: DEFAULT_SCRIPT_URL,
       machines: FALLBACK_MACHINES.slice(),
       bookings: [],
+      history: [],
       complaints: [],
-      students: [] // Loaded dynamically from Google Sheet for Admin
+      students: []
     };
 
     try {
@@ -584,18 +943,18 @@
       }
     } catch (e) {}
 
-    let currentUser = null; // { role: 'student' | 'admin', data: {...} }
-    let pendingRollData = null; // { rollNo, name, program, passwordSet }
-    let pendingBookingSlot = null; // { machineId, floor, slotNum, slotTiming, date }
-    let selectedStuDate = TODAY_STR;
+    let currentUser = null;
+    let pendingRollData = null;
+    let pendingBookingSlot = null;
+    let pendingCancelBookingObj = null;
+    let hasClickedGo = false;
+    let selectedStuDate = getLocalDateString(0);
     let selectedStuFloor = "0";
+    let activeStuTab = "book";
     let activeAdminTab = "bookings";
     let activeAdminSlotCtx = null;
     let syncTimer = null;
 
-    // =========================================================================
-    // GOOGLE SHEET API CALL HELPERS (REAL-TIME GET & POST)
-    // =========================================================================
     function setStatusText(txt) {
       const el = document.getElementById("headerStatusText");
       if (el) el.textContent = txt;
@@ -622,20 +981,19 @@
         if (data && data.ok) {
           if (Array.isArray(data.machines) && data.machines.length > 0) state.machines = data.machines;
           if (Array.isArray(data.bookings)) state.bookings = data.bookings;
+          if (Array.isArray(data.history)) state.history = data.history;
           if (Array.isArray(data.complaints)) state.complaints = data.complaints;
           if (Array.isArray(data.students)) state.students = data.students;
           setStatusText("Live Google Sheet Connected");
+          checkLocalDeviceNotifications();
           if (currentUser && currentUser.role === "student") renderStudentPortal();
           if (currentUser && currentUser.role === "admin") renderAdminPortal();
         }
       } catch (err) {
-        setStatusText("Google Sheet connection ready");
+        setStatusText("Google Sheet Ready");
       }
     }
 
-    // =========================================================================
-    // CONTINUOUS 24-HOUR SLOT MATH
-    // =========================================================================
     function formatHHMM(totalMinutes) {
       const h = Math.floor(totalMinutes / 60) % 24;
       const m = totalMinutes % 60;
@@ -672,10 +1030,10 @@
         error: "bg-rose-700 text-white border-rose-600"
       };
       const el = document.createElement("div");
-      el.className = "pointer-events-auto px-4 py-3 rounded-xl shadow-lg border text-xs font-medium flex items-center justify-between gap-3 transition " + (colors[type] || colors.info);
+      el.className = "pointer-events-auto px-4 py-3 rounded-xl shadow-lg border text-xs font-bold flex items-center justify-between gap-3 transition " + (colors[type] || colors.info);
       el.innerHTML = "<span>" + escapeHtml(message) + "</span>";
       container.appendChild(el);
-      setTimeout(() => { el.remove(); }, 4200);
+      setTimeout(() => { el.remove(); }, 4500);
     }
 
     function escapeHtml(s) {
@@ -687,7 +1045,7 @@
     }
 
     // =========================================================================
-    // LIVE GOOGLE SHEET AUTHENTICATION (CHECK ROLL, OTP, LOGIN, ADMIN)
+    // 4. AUTHENTICATION & FORGOT PASSWORD FLOWS
     // =========================================================================
     async function handleCheckRollClick() {
       const input = document.getElementById("inputStudentRoll");
@@ -719,14 +1077,12 @@
 
         pendingRollData = res;
         if (res.passwordSet) {
-          // Returning user: go straight to Password screen
           boxSetup.classList.add("hidden");
           boxLogin.classList.remove("hidden");
           document.getElementById("loginStudentName").textContent = res.name + " (" + res.rollNo + ")";
           document.getElementById("inputLoginPassword").value = "";
           document.getElementById("inputLoginPassword").focus();
         } else {
-          // First-time user: verify room, enter phone & email, request OTP
           boxLogin.classList.add("hidden");
           boxSetup.classList.remove("hidden");
           otpStep.classList.add("hidden");
@@ -739,7 +1095,7 @@
           document.getElementById("inputSetupPassword").value = "";
         }
       } catch (err) {
-        showToast("Could not reach Google Sheet backend. Make sure your updated Code.gs is deployed.", "error");
+        showToast("Could not connect to Google Sheet. Ensure Code.gs v3 is deployed.", "error");
       } finally {
         btn.disabled = false;
         btn.textContent = "Continue";
@@ -754,7 +1110,7 @@
       const btn = document.getElementById("btnSendOtp");
 
       if (!roomNo) {
-        showToast("Please enter your Room Number first.", "warn");
+        showToast("Please enter your Room Number.", "warn");
         return;
       }
       if (phone.length < 8) {
@@ -775,13 +1131,13 @@
           email: email
         });
         if (!res.ok) {
-          showToast(res.error || "Failed to send OTP. Ensure Code.gs v2 is deployed in your Google Sheet.", "error");
+          showToast(res.error || "Failed to send OTP.", "error");
           return;
         }
         document.getElementById("otpVerificationStep").classList.remove("hidden");
         showToast(res.message || ("6-digit OTP sent to " + email), "success");
       } catch (err) {
-        showToast("Error contacting Google Sheet backend to send OTP.", "error");
+        showToast("Error sending OTP.", "error");
       } finally {
         btn.disabled = false;
         btn.textContent = "Resend OTP";
@@ -807,7 +1163,7 @@
       }
 
       btn.disabled = true;
-      btn.textContent = "Verifying & Saving...";
+      btn.textContent = "Activating...";
       try {
         const res = await apiPost("setupPassword", {
           rollNo: pendingRollData.rollNo,
@@ -818,19 +1174,20 @@
           password: password
         });
         if (!res.ok) {
-          showToast(res.error || "Registration failed.", "error");
+          showToast(res.error || "Activation failed.", "error");
           return;
         }
         currentUser = { role: "student", data: res.student };
+        hasClickedGo = false;
         saveSession();
-        showToast("Account activated and saved to Google Sheet!", "success");
+        showToast("Account activated!", "success");
         await pullCloudState(true);
         switchMainView("student");
       } catch (err) {
         showToast("Connection error while saving password.", "error");
       } finally {
         btn.disabled = false;
-        btn.textContent = "Verify OTP & Create Account";
+        btn.textContent = "Verify OTP & Activate Account";
       }
     }
 
@@ -851,16 +1208,17 @@
           password: password
         });
         if (!res.ok) {
-          showToast(res.error || "Invalid credentials.", "error");
+          showToast(res.error || "Invalid password.", "error");
           return;
         }
         currentUser = { role: "student", data: res.student };
+        hasClickedGo = false;
         saveSession();
-        showToast("Signed in as " + res.student.name, "success");
+        showToast("Welcome, " + res.student.name, "success");
         await pullCloudState(true);
         switchMainView("student");
       } catch (err) {
-        showToast("Error verifying credentials with Google Sheet.", "error");
+        showToast("Error verifying password.", "error");
       } finally {
         btn.disabled = false;
         btn.textContent = "Sign In";
@@ -887,11 +1245,11 @@
         }
         currentUser = { role: "admin", data: res.admin };
         saveSession();
-        showToast("Logged in to Admin Control Panel.", "success");
+        showToast("Logged in as Admin.", "success");
         await pullCloudState(true);
         switchMainView("admin");
       } catch (err) {
-        showToast("Could not verify Admin credentials with Google Sheet.", "error");
+        showToast("Could not verify Admin credentials.", "error");
       } finally {
         btn.disabled = false;
         btn.textContent = "Sign In as Admin";
@@ -928,11 +1286,12 @@
         uBox.classList.add("flex");
         btnSyncNow.classList.remove("hidden");
         uLbl.textContent = currentUser.data.name + " (" + currentUser.data.rollNo + ")";
-        // Auto-select the student's room floor if valid (0-3)
+        populateSevenDaysSelect();
         const rm = Number(currentUser.data.roomNo || 0);
         if (rm >= 100 && rm < 500) {
           const fl = Math.min(3, Math.max(0, Math.floor(rm / 100) - 1));
           selectedStuFloor = String(fl);
+          document.getElementById("stuSelectFloor").value = selectedStuFloor;
         }
         renderStudentPortal();
         syncTimer = setInterval(() => pullCloudState(true), 20000);
@@ -953,143 +1312,59 @@
     }
 
     // =========================================================================
-    // STUDENT PORTAL: FLOOR & DAY SELECTION -> RR MACHINE AVAILABILITY & SLOTS
+    // 5. STUDENT PORTAL: "GO" BUTTON SLOTS, MY BOOKINGS (LIMIT 2), HISTORY
     // =========================================================================
+    function switchStudentTab(tabName) {
+      activeStuTab = tabName;
+      document.getElementById("panelStuBook").classList.toggle("hidden", tabName !== "book");
+      document.getElementById("panelStuMyBookings").classList.toggle("hidden", tabName !== "mybookings");
+      document.getElementById("panelStuComplaint").classList.toggle("hidden", tabName !== "complaint");
+
+      document.getElementById("tabStuBook").className = "px-3.5 py-2 rounded-xl text-xs font-bold transition " +
+        (tabName === "book" ? "bg-blue-600 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-700");
+      document.getElementById("tabStuMyBookings").className = "px-3.5 py-2 rounded-xl text-xs font-bold transition " +
+        (tabName === "mybookings" ? "bg-blue-600 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-700");
+      document.getElementById("tabStuComplaint").className = "px-3.5 py-2 rounded-xl text-xs font-bold transition " +
+        (tabName === "complaint" ? "bg-blue-600 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-700");
+
+      renderStudentPortal();
+    }
+
     function renderStudentPortal() {
       if (!currentUser || currentUser.role !== "student") return;
       const stu = currentUser.data;
+      const stuRoll = stu.rollNo.toUpperCase();
+
       document.getElementById("stuBadgeRoll").textContent = stu.rollNo;
       document.getElementById("stuBadgeRoom").textContent = "Room " + stu.roomNo + (stu.program ? (" • " + stu.program) : "");
       document.getElementById("stuWelcomeTitle").textContent = stu.name;
 
-      // 1. Booking Day Buttons
-      const btnToday = document.getElementById("btnDateToday");
-      const btnTom = document.getElementById("btnDateTomorrow");
-      btnToday.textContent = "Today (" + formatDisplayDate(TODAY_STR) + ")";
-      btnTom.textContent = "Tomorrow (" + formatDisplayDate(TOMORROW_STR) + ")";
+      const myActiveBookings = state.bookings.filter(b => b.status === "ACTIVE" && b.rollNo.toUpperCase() === stuRoll);
+      document.getElementById("stuActiveQuotaBadge").textContent = myActiveBookings.length + "/" + MAX_ACTIVE_SLOTS;
 
-      btnToday.className = "py-2.5 px-3 rounded-xl text-xs font-semibold border transition " +
-        (selectedStuDate === TODAY_STR ? "bg-slate-900 text-white border-slate-900" : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200");
-      btnTom.className = "py-2.5 px-3 rounded-xl text-xs font-semibold border transition " +
-        (selectedStuDate === TOMORROW_STR ? "bg-slate-900 text-white border-slate-900" : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200");
-
-      // 2. Floor Selector Buttons
-      document.querySelectorAll(".stu-floor-btn").forEach(btn => {
-        const f = btn.getAttribute("data-floor");
-        btn.className = "stu-floor-btn py-2.5 px-2 rounded-xl text-xs font-semibold border transition " +
-          (String(f) === String(selectedStuFloor)
-            ? "bg-blue-600 text-white border-blue-600 shadow-sm"
-            : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100");
-      });
-
-      renderStudentActiveBookingCard();
-      renderStudentFloorMachines();
+      if (hasClickedGo) {
+        renderStudentFloorMachines();
+      }
+      renderStudentMyBookingsAndHistory(myActiveBookings);
       renderStudentComplaintsSection();
     }
 
-    function renderStudentActiveBookingCard() {
-      const container = document.getElementById("stuActiveBookingContainer");
-      const stu = currentUser.data;
-      const myBooking = state.bookings.find(b => b.status === "ACTIVE" && b.rollNo.toUpperCase() === stu.rollNo.toUpperCase());
-
-      if (!myBooking) {
-        container.innerHTML = "";
-        return;
-      }
-
-      // Check if there is a previous slot holder (Slot N - 1) on the same date & machine
-      const prevBooking = state.bookings.find(
-        b => b.status === "ACTIVE" &&
-             b.date === myBooking.date &&
-             b.machineId === myBooking.machineId &&
-             Number(b.slotNum) === Number(myBooking.slotNum) - 1
-      );
-
-      let prevInfoHtml = "";
-      if (prevBooking && prevBooking.roomNo && prevBooking.roomNo !== "Hidden") {
-        prevInfoHtml = `
-          <div class="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-950 flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <span class="font-bold uppercase text-[10px] bg-amber-200 text-amber-900 px-2 py-0.5 rounded mr-1.5">Previous Slot (#${prevBooking.slotNum})</span>
-              <span><strong>${escapeHtml(prevBooking.studentName)}</strong> • Room <strong>${escapeHtml(prevBooking.roomNo)}</strong> • Phone: <strong>${escapeHtml(prevBooking.phone || "N/A")}</strong></span>
-            </div>
-            <span class="text-[11px] text-amber-800">Contact if laundry is left inside</span>
-          </div>
-        `;
-      }
-
-      container.innerHTML = `
-        <div class="bg-white rounded-2xl shadow-sm border-2 border-blue-600 p-4 sm:p-5">
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Confirmed Booking</span>
-                <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800">Active</span>
-              </div>
-              <h3 class="text-sm sm:text-base font-bold text-slate-900 mt-1">
-                Rest Room ${escapeHtml(myBooking.machineId)} (Floor ${myBooking.floor}) • Slot #${myBooking.slotNum} (${escapeHtml(myBooking.slotTiming)})
-              </h3>
-              <p class="text-xs text-slate-500">Date: ${escapeHtml(myBooking.date)} (${formatDisplayDate(myBooking.date)})</p>
-            </div>
-
-            <button type="button" onclick="cancelStudentBooking('${myBooking.bookingId}')"
-              class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition">
-              Cancel Booking
-            </button>
-          </div>
-          ${prevInfoHtml}
-        </div>
-      `;
-    }
-
     function renderStudentFloorMachines() {
-      const floorMachines = state.machines.filter(m => String(m.floor) === String(selectedStuFloor));
-      const healthyMachines = floorMachines.filter(m => m.status === "Healthy");
-      const availBar = document.getElementById("stuFloorAvailabilityBar");
+      const floorMachines = state.machines.filter(m => String(m.floor) === String(selectedStuFloor) && m.status === "Healthy");
       const grid = document.getElementById("stuMachinesGrid");
+      const legend = document.getElementById("stuSlotLegend");
 
-      // Build RR machine availability summary pills for the selected floor & day
-      if (healthyMachines.length === 0) {
-        availBar.innerHTML = `<p class="text-xs text-rose-600 font-medium">No Healthy machines currently available on Floor ${selectedStuFloor}.</p>`;
-        grid.innerHTML = "";
+      if (floorMachines.length === 0) {
+        legend.classList.add("hidden");
+        grid.innerHTML = `<div class="bg-white rounded-2xl p-6 text-center text-sm text-rose-600 border border-rose-200 font-semibold">No Healthy machines currently available on Floor ${selectedStuFloor}.</div>`;
         return;
       }
 
-      const summaryCards = healthyMachines.map(m => {
-        const totalSlots = Math.floor(1440 / m.cycleMins);
-        const bookedCount = state.bookings.filter(
-          b => b.status === "ACTIVE" && b.date === selectedStuDate && b.machineId === m.id
-        ).length;
-        const freeCount = Math.max(0, totalSlots - bookedCount);
-        return `
-          <a href="#machine_card_${m.id}" class="p-3 rounded-xl border border-slate-200 bg-slate-50 hover:border-blue-400 hover:bg-blue-50/40 transition flex items-center justify-between gap-2">
-            <div>
-              <span class="text-xs font-bold text-slate-900">${m.id}</span>
-              <span class="text-[11px] text-slate-500 ml-1">(${m.cycleMins}m cycle)</span>
-            </div>
-            <div class="text-right">
-              <span class="text-xs font-bold ${freeCount > 0 ? "text-emerald-700" : "text-rose-600"}">${freeCount} / ${totalSlots} Free</span>
-            </div>
-          </a>
-        `;
-      }).join("");
-
-      availBar.innerHTML = `
-        <div class="space-y-2">
-          <div class="flex items-center justify-between text-xs text-slate-600">
-            <span><strong>Floor ${selectedStuFloor} Availability</strong> for <strong>${formatDisplayDate(selectedStuDate)}</strong> (${healthyMachines.length} Healthy RR Machines):</span>
-            <span class="text-[11px] text-slate-400">Tap any Free slot to book</span>
-          </div>
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
-            ${summaryCards}
-          </div>
-        </div>
-      `;
-
+      legend.classList.remove("hidden");
       const stuRoll = currentUser.data.rollNo.toUpperCase();
-      const myActiveBooking = state.bookings.find(b => b.status === "ACTIVE" && b.rollNo.toUpperCase() === stuRoll);
+      const myActiveBookings = state.bookings.filter(b => b.status === "ACTIVE" && b.rollNo.toUpperCase() === stuRoll);
 
-      grid.innerHTML = healthyMachines.map(m => {
+      grid.innerHTML = floorMachines.map(m => {
         const slots = generateMachineSlots(m.cycleMins);
         const bookedCount = state.bookings.filter(
           b => b.status === "ACTIVE" && b.date === selectedStuDate && b.machineId === m.id
@@ -1103,69 +1378,73 @@
           if (!booking) {
             return `
               <button type="button" onclick="openBookingConfirmModal('${m.id}', ${m.floor}, ${s.slotNum}, '${s.timing}')"
-                class="p-2.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/60 text-left transition group">
+                class="slot-card-free p-3 rounded-xl text-left group">
                 <div class="flex items-center justify-between">
-                  <span class="text-[11px] font-bold text-slate-700 group-hover:text-blue-700">Slot #${s.slotNum}</span>
-                  <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">Free</span>
+                  <span class="text-xs font-bold text-emerald-950">Slot #${s.slotNum}</span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white">Free</span>
                 </div>
-                <p class="text-xs font-mono font-semibold text-slate-900 mt-1">${s.timing}</p>
+                <p class="text-xs font-bold text-emerald-900 mt-1">${s.timing}</p>
               </button>
             `;
           }
 
           const isMine = booking.rollNo.toUpperCase() === stuRoll;
-          const isPrevToMine = myActiveBooking &&
-            myActiveBooking.date === selectedStuDate &&
-            myActiveBooking.machineId === m.id &&
-            Number(myActiveBooking.slotNum) === s.slotNum + 1;
+          // Check if the logged-in student holds Slot (s.slotNum + 1) on this same machine & date
+          const isPrevToMine = myActiveBookings.some(
+            mb => mb.date === selectedStuDate && mb.machineId === m.id && Number(mb.slotNum) === s.slotNum + 1
+          );
 
           if (isMine) {
             return `
-              <div class="p-2.5 rounded-xl border-2 border-blue-600 bg-blue-50 text-left">
+              <div class="slot-card-mine p-3 rounded-xl text-left">
                 <div class="flex items-center justify-between">
-                  <span class="text-[11px] font-bold text-blue-900">Slot #${s.slotNum}</span>
-                  <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-600 text-white">Booked by You</span>
+                  <span class="text-xs font-bold text-blue-950">Slot #${s.slotNum}</span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-600 text-white">Your Slot</span>
                 </div>
-                <p class="text-xs font-mono font-bold text-blue-950 mt-1">${s.timing}</p>
+                <p class="text-xs font-bold text-blue-900 mt-1">${s.timing}</p>
+                <button type="button" onclick="openCancelConfirmModal('${booking.bookingId}')" class="text-[11px] text-rose-700 hover:underline font-bold mt-1 inline-block">
+                  Cancel Slot
+                </button>
               </div>
             `;
           }
 
           if (isPrevToMine && booking.roomNo && booking.roomNo !== "Hidden") {
             return `
-              <div class="p-2.5 rounded-xl border border-amber-300 bg-amber-50 text-left">
+              <div class="slot-card-prev p-3 rounded-xl text-left">
                 <div class="flex items-center justify-between">
-                  <span class="text-[11px] font-bold text-amber-900">Slot #${s.slotNum}</span>
-                  <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-200 text-amber-900">Prev User</span>
+                  <span class="text-xs font-bold text-amber-950">Slot #${s.slotNum}</span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-600 text-white">Prev User</span>
                 </div>
-                <p class="text-xs font-mono font-semibold text-amber-950 mt-1">${s.timing}</p>
-                <p class="text-[10px] text-amber-900 font-medium mt-0.5 truncate">Rm ${booking.roomNo} • ${escapeHtml(booking.phone || "")}</p>
+                <p class="text-xs font-bold text-amber-950 mt-1">${s.timing}</p>
+                <p class="text-[11px] font-bold text-amber-900 mt-1 truncate">${escapeHtml(booking.studentName)}</p>
+                <p class="text-[11px] font-bold text-amber-800">Rm ${escapeHtml(booking.roomNo)} • <a href="tel:${escapeHtml(booking.phone)}" class="underline">${escapeHtml(booking.phone || "N/A")}</a></p>
               </div>
             `;
           }
 
           return `
-            <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-100 text-left opacity-70 cursor-not-allowed">
+            <div class="slot-card-booked p-3 rounded-xl text-left cursor-not-allowed">
               <div class="flex items-center justify-between">
-                <span class="text-[11px] font-semibold text-slate-500">Slot #${s.slotNum}</span>
-                <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-slate-200 text-slate-600">Booked</span>
+                <span class="text-xs font-bold text-slate-500">Slot #${s.slotNum}</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-300 text-slate-700">Booked</span>
               </div>
-              <p class="text-xs font-mono text-slate-500 mt-1">${s.timing}</p>
+              <p class="text-xs font-semibold text-slate-500 line-through mt-1">${s.timing}</p>
             </div>
           `;
         }).join("");
 
         return `
-          <div id="machine_card_${m.id}" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-3.5">
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-3.5">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
               <div class="flex items-center gap-2.5">
-                <span class="px-2.5 py-1 rounded-lg bg-slate-900 text-white font-bold text-xs">${m.id}</span>
+                <span class="px-3 py-1 rounded-xl bg-slate-900 text-white font-bold text-xs">${m.id}</span>
                 <div>
-                  <h4 class="text-sm font-bold text-slate-900">Rest Room ${m.id} • Floor ${m.floor}</h4>
-                  <p class="text-xs text-slate-500">Run Time: <strong>${m.cycleMins} mins</strong> • <strong>${freeCount} of ${slots.length} slots available</strong> on ${formatDisplayDate(selectedStuDate)}</p>
+                  <h4 class="text-sm font-bold text-slate-900">Rest Room ${m.id} • Floor ${m.floor} (${formatDayAndDate(selectedStuDate)})</h4>
+                  <p class="text-xs text-slate-500">Cycle Run Time: <strong>${m.cycleMins} mins</strong> • <strong>${freeCount} free</strong> of ${slots.length} slots</p>
                 </div>
               </div>
-              <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                 Healthy
               </span>
             </div>
@@ -1177,15 +1456,126 @@
       }).join("");
     }
 
+    function renderStudentMyBookingsAndHistory(myActiveBookings) {
+      const remaining = Math.max(0, MAX_ACTIVE_SLOTS - myActiveBookings.length);
+      const quotaBanner = document.getElementById("stuQuotaBanner");
+
+      quotaBanner.innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
+                Booking Quota Limit: ${MAX_ACTIVE_SLOTS} Slots
+              </span>
+              <span class="text-xs font-bold ${remaining > 0 ? "text-emerald-700" : "text-amber-700"}">
+                • Remaining Slots You Can Book: ${remaining}
+              </span>
+            </div>
+            <p class="text-sm font-bold text-slate-900">
+              You currently hold ${myActiveBookings.length} of ${MAX_ACTIVE_SLOTS} allowed active bookings.
+            </p>
+          </div>
+          ${remaining > 0 ? `
+            <button type="button" onclick="switchStudentTab('book')" class="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white transition">
+              + Book Remaining Slot (${remaining} Left)
+            </button>
+          ` : `
+            <span class="text-xs font-semibold text-slate-500">Cancel an active slot below if you need to rebook</span>
+          `}
+        </div>
+      `;
+
+      const activeList = document.getElementById("stuActiveBookingsList");
+      if (myActiveBookings.length === 0) {
+        activeList.innerHTML = `<p class="text-xs text-slate-400 py-3">You have no active upcoming bookings right now.</p>`;
+      } else {
+        activeList.innerHTML = myActiveBookings.map(myBooking => {
+          // Find previous slot holder (Slot N - 1) on same date & machine
+          const prevBooking = state.bookings.find(
+            b => b.status === "ACTIVE" &&
+                 b.date === myBooking.date &&
+                 b.machineId === myBooking.machineId &&
+                 Number(b.slotNum) === Number(myBooking.slotNum) - 1
+          );
+
+          let prevHtml = "";
+          if (prevBooking && prevBooking.roomNo && prevBooking.roomNo !== "Hidden") {
+            prevHtml = `
+              <div class="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-300 text-xs text-amber-950 flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <span class="font-bold uppercase text-[10px] bg-amber-200 text-amber-900 px-2 py-0.5 rounded mr-1.5">Previous Slot (#${prevBooking.slotNum}) User</span>
+                  <span><strong>${escapeHtml(prevBooking.studentName)}</strong> • Room <strong>${escapeHtml(prevBooking.roomNo)}</strong> • Phone: <strong>${escapeHtml(prevBooking.phone || "N/A")}</strong></span>
+                </div>
+                ${prevBooking.phone ? `
+                  <a href="tel:${escapeHtml(prevBooking.phone)}" class="px-3 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs">
+                    📞 Call Previous User
+                  </a>
+                ` : ""}
+              </div>
+            `;
+          } else {
+            prevHtml = `
+              <div class="mt-2.5 text-xs text-slate-500">
+                Previous Slot (#${myBooking.slotNum - 1}): Free / No previous resident booked right before your slot.
+              </div>
+            `;
+          }
+
+          return `
+            <div class="p-4 rounded-2xl border-2 border-blue-600 bg-blue-50/40">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <span class="text-[11px] font-bold uppercase text-blue-700">${formatDayAndDate(myBooking.date)} (${escapeHtml(myBooking.date)})</span>
+                  <h4 class="text-sm sm:text-base font-bold text-slate-900 mt-0.5">
+                    Rest Room ${escapeHtml(myBooking.machineId)} (Floor ${myBooking.floor}) • Slot #${myBooking.slotNum}: ${escapeHtml(myBooking.slotTiming)}
+                  </h4>
+                </div>
+                <button type="button" onclick="openCancelConfirmModal('${myBooking.bookingId}')"
+                  class="px-3.5 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white transition">
+                  Cancel Booking
+                </button>
+              </div>
+              ${prevHtml}
+            </div>
+          `;
+        }).join("");
+      }
+
+      // Render Student Booking History Table
+      const histTbody = document.getElementById("stuHistoryTableBody");
+      const myHistory = state.history || [];
+      if (myHistory.length === 0) {
+        histTbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-400">No booking history found in Google Sheet yet.</td></tr>`;
+      } else {
+        histTbody.innerHTML = myHistory.map(h => {
+          const st = String(h.status || "").toUpperCase();
+          let badgeClass = "bg-slate-100 text-slate-700";
+          if (st === "ACTIVE") badgeClass = "bg-blue-100 text-blue-800";
+          else if (st === "COMPLETED") badgeClass = "bg-emerald-100 text-emerald-800";
+          else if (st.includes("CANCEL")) badgeClass = "bg-rose-100 text-rose-800";
+
+          return `
+            <tr class="hover:bg-slate-50">
+              <td class="py-2.5 px-3 font-bold">${escapeHtml(h.date)} (${formatDayAndDate(h.date)})</td>
+              <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded bg-slate-900 text-white font-bold">${escapeHtml(h.machineId)}</span> (Floor ${h.floor})</td>
+              <td class="py-2.5 px-3 font-semibold">Slot #${h.slotNum} (${escapeHtml(h.slotTiming)})</td>
+              <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}">${escapeHtml(st)}</span></td>
+              <td class="py-2.5 px-3 text-slate-500">${escapeHtml(String(h.bookedAt || "").slice(0, 16).replace("T", " "))}</td>
+            </tr>
+          `;
+        }).join("");
+      }
+    }
+
     // =========================================================================
-    // BOOKING CONFIRMATION POP-UP MODAL (#6 & #12)
+    // 6. BOOKING & CANCELLATION CONFIRMATION POP-UPS
     // =========================================================================
     window.openBookingConfirmModal = function(machineId, floor, slotNum, slotTiming) {
       if (!currentUser || currentUser.role !== "student") return;
       const stu = currentUser.data;
-      const existingMy = state.bookings.find(b => b.status === "ACTIVE" && b.rollNo.toUpperCase() === stu.rollNo.toUpperCase());
-      if (existingMy) {
-        showToast("You already have an active booking (" + existingMy.machineId + " on " + existingMy.date + ", " + existingMy.slotTiming + "). Cancel it first to book a different slot.", "warn");
+      const myActive = state.bookings.filter(b => b.status === "ACTIVE" && b.rollNo.toUpperCase() === stu.rollNo.toUpperCase());
+      if (myActive.length >= MAX_ACTIVE_SLOTS) {
+        showToast("You already have " + MAX_ACTIVE_SLOTS + " active bookings (maximum limit). Cancel one in 'My Bookings' first.", "warn");
         return;
       }
 
@@ -1197,12 +1587,11 @@
         date: selectedStuDate
       };
 
-      const detailsEl = document.getElementById("modalConfirmBookingDetails");
-      detailsEl.innerHTML = `
+      document.getElementById("modalConfirmBookingDetails").innerHTML = `
         <p><strong>Machine:</strong> Rest Room ${escapeHtml(machineId)} (Floor ${floor})</p>
-        <p><strong>Date:</strong> ${escapeHtml(selectedStuDate)} (${formatDisplayDate(selectedStuDate)})</p>
-        <p><strong>Slot:</strong> Slot #${slotNum} (${escapeHtml(slotTiming)})</p>
-        <p><strong>Resident:</strong> ${escapeHtml(stu.name)} (${escapeHtml(stu.rollNo)}, Room ${escapeHtml(stu.roomNo)})</p>
+        <p><strong>Day &amp; Date:</strong> ${formatDayAndDate(selectedStuDate)} (${escapeHtml(selectedStuDate)})</p>
+        <p><strong>Slot Timing:</strong> Slot #${slotNum} (${escapeHtml(slotTiming)})</p>
+        <p><strong>Resident:</strong> ${escapeHtml(stu.name)} (${escapeHtml(stu.rollNo)}, Rm ${escapeHtml(stu.roomNo)})</p>
       `;
 
       const modal = document.getElementById("modalConfirmBooking");
@@ -1224,49 +1613,79 @@
       btn.disabled = true;
       btn.textContent = "Booking...";
 
-      const payload = {
-        date: pendingBookingSlot.date,
-        floor: pendingBookingSlot.floor,
-        machineId: pendingBookingSlot.machineId,
-        slotNum: pendingBookingSlot.slotNum,
-        slotTiming: pendingBookingSlot.slotTiming,
-        rollNo: stu.rollNo,
-        studentName: stu.name,
-        roomNo: stu.roomNo,
-        phone: stu.phone || "",
-        email: stu.email || ""
-      };
-
       try {
-        const res = await apiPost("bookSlot", payload);
+        const res = await apiPost("bookSlot", {
+          date: pendingBookingSlot.date,
+          floor: pendingBookingSlot.floor,
+          machineId: pendingBookingSlot.machineId,
+          slotNum: pendingBookingSlot.slotNum,
+          slotTiming: pendingBookingSlot.slotTiming,
+          rollNo: stu.rollNo,
+          studentName: stu.name,
+          roomNo: stu.roomNo,
+          phone: stu.phone || "",
+          email: stu.email || ""
+        });
         if (!res.ok) {
           showToast(res.error || "Could not book slot.", "error");
           return;
         }
         closeBookingConfirmModal();
-        showToast("Slot #" + payload.slotNum + " on " + payload.machineId + " confirmed!", "success");
+        showToast("Booking confirmed! Saved to Google Sheet.", "success");
         await pullCloudState(true);
       } catch (err) {
-        showToast("Network error while saving booking to Google Sheet.", "error");
+        showToast("Network error while booking slot.", "error");
       } finally {
         btn.disabled = false;
         btn.textContent = "Confirm Booking";
       }
     }
 
-    window.cancelStudentBooking = async function(bookingId) {
+    window.openCancelConfirmModal = function(bookingId) {
+      const b = state.bookings.find(x => x.bookingId === bookingId);
+      if (!b) return;
+      pendingCancelBookingObj = b;
+      document.getElementById("modalConfirmCancelDetails").innerHTML = `
+        <p><strong>Machine:</strong> Rest Room ${escapeHtml(b.machineId)} (Floor ${b.floor})</p>
+        <p><strong>Day &amp; Date:</strong> ${formatDayAndDate(b.date)} (${escapeHtml(b.date)})</p>
+        <p><strong>Slot:</strong> Slot #${b.slotNum} (${escapeHtml(b.slotTiming)})</p>
+      `;
+      const modal = document.getElementById("modalConfirmCancel");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    };
+
+    function closeCancelConfirmModal() {
+      pendingCancelBookingObj = null;
+      const modal = document.getElementById("modalConfirmCancel");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    async function handleConfirmCancelSubmit() {
+      if (!pendingCancelBookingObj) return;
+      const btn = document.getElementById("btnConfirmCancelSubmit");
+      btn.disabled = true;
+      btn.textContent = "Cancelling...";
       try {
-        const res = await apiPost("cancelSlot", { bookingId: bookingId, reason: "Cancelled by student" });
+        const res = await apiPost("cancelSlot", {
+          bookingId: pendingCancelBookingObj.bookingId,
+          reason: "Cancelled by student"
+        });
         if (!res.ok) {
           showToast(res.error || "Could not cancel booking.", "error");
           return;
         }
+        closeCancelConfirmModal();
         showToast("Booking cancelled and slot released.", "info");
         await pullCloudState(true);
       } catch (err) {
-        showToast("Error cancelling slot.", "error");
+        showToast("Error cancelling booking.", "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Yes, Cancel Booking";
       }
-    };
+    }
 
     function renderStudentComplaintsSection() {
       const sel = document.getElementById("inputCompMachine");
@@ -1279,7 +1698,7 @@
       const myRoll = currentUser.data.rollNo.toUpperCase();
       const items = state.complaints.filter(c => String(c.rollNo).toUpperCase() === myRoll);
       if (items.length === 0) {
-        listEl.innerHTML = `<p class="text-xs text-slate-400 py-3">No issues reported yet.</p>`;
+        listEl.innerHTML = `<p class="text-xs text-slate-400 py-3">No maintenance requests submitted yet.</p>`;
         return;
       }
       listEl.innerHTML = items.map(c => `
@@ -1289,13 +1708,13 @@
             <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${c.status === "RESOLVED" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}">${escapeHtml(c.status)}</span>
           </div>
           <p class="text-xs text-slate-600">${escapeHtml(c.description)}</p>
-          ${c.adminNotes ? `<p class="text-[11px] text-blue-700 font-medium pt-1">Admin Note: ${escapeHtml(c.adminNotes)}</p>` : ""}
+          ${c.adminNotes ? `<p class="text-xs text-blue-700 font-bold pt-1">Admin Action Note: ${escapeHtml(c.adminNotes)}</p>` : ""}
         </div>
       `).join("");
     }
 
     // =========================================================================
-    // ADMIN PORTAL RENDERING & LIVE GOOGLE SHEET CRUD
+    // 7. ADMIN PORTAL RENDERING & MAINTENANCE ACTIONS
     // =========================================================================
     function renderAdminPortal() {
       if (!currentUser || currentUser.role !== "admin") return;
@@ -1306,25 +1725,25 @@
 
       document.querySelectorAll(".admin-tab-btn").forEach(btn => {
         const t = btn.getAttribute("data-admin-tab");
-        btn.className = "admin-tab-btn px-3 py-2 rounded-xl text-xs font-semibold transition " +
+        btn.className = "admin-tab-btn px-3 py-2 rounded-xl text-xs font-bold transition " +
           (t === activeAdminTab ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200");
       });
 
       document.getElementById("adminPanelBookings").classList.toggle("hidden", activeAdminTab !== "bookings");
-      document.getElementById("adminPanelMachines").classList.toggle("hidden", activeAdminTab !== "machines");
       document.getElementById("adminPanelComplaints").classList.toggle("hidden", activeAdminTab !== "complaints");
+      document.getElementById("adminPanelMachines").classList.toggle("hidden", activeAdminTab !== "machines");
       document.getElementById("adminPanelStudents").classList.toggle("hidden", activeAdminTab !== "students");
       document.getElementById("adminPanelSecurity").classList.toggle("hidden", activeAdminTab !== "security");
 
       if (activeAdminTab === "bookings") renderAdminBookingsAndGrid();
-      if (activeAdminTab === "machines") renderAdminMachinesFleet();
       if (activeAdminTab === "complaints") renderAdminComplaints();
+      if (activeAdminTab === "machines") renderAdminMachinesFleet();
       if (activeAdminTab === "students") renderAdminStudentDirectory();
     }
 
     function renderAdminBookingsAndGrid() {
       const dateInput = document.getElementById("adminDateInput");
-      if (!dateInput.value) dateInput.value = TODAY_STR;
+      if (!dateInput.value) dateInput.value = getLocalDateString(0);
       const inspectDate = dateInput.value;
       const floorFilter = document.getElementById("adminFloorFilter").value || "0";
 
@@ -1337,12 +1756,12 @@
       } else {
         tbody.innerHTML = activeBookings.map(b => `
           <tr class="hover:bg-slate-50">
-            <td class="py-2 px-3 font-mono font-semibold">${escapeHtml(b.date)} • #${b.slotNum} (${escapeHtml(b.slotTiming)})</td>
+            <td class="py-2 px-3 font-bold">${escapeHtml(b.date)} • #${b.slotNum} (${escapeHtml(b.slotTiming)})</td>
             <td class="py-2 px-3"><span class="px-2 py-0.5 rounded bg-slate-900 text-white font-bold">${escapeHtml(b.machineId)}</span> (Fl ${b.floor})</td>
-            <td class="py-2 px-3 font-medium text-slate-900">${escapeHtml(b.studentName)} <span class="text-slate-500">(${escapeHtml(b.rollNo)})</span></td>
+            <td class="py-2 px-3 font-bold text-slate-900">${escapeHtml(b.studentName)} <span class="text-slate-500">(${escapeHtml(b.rollNo)})</span></td>
             <td class="py-2 px-3">Rm <strong>${escapeHtml(b.roomNo)}</strong> • ${escapeHtml(b.phone || "—")}</td>
             <td class="py-2 px-3 text-right">
-              <button type="button" onclick="adminCancelBooking('${b.bookingId}')" class="text-rose-600 hover:text-rose-800 font-semibold">Cancel Slot</button>
+              <button type="button" onclick="adminCancelBooking('${b.bookingId}')" class="text-rose-600 hover:text-rose-800 font-bold">Cancel Slot</button>
             </td>
           </tr>
         `).join("");
@@ -1362,7 +1781,7 @@
               </div>
               <div class="flex items-center gap-2">
                 <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${isHealthy ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800"}">${m.status}</span>
-                <button type="button" onclick="adminToggleHealth('${m.id}', '${isHealthy ? "Sick" : "Healthy"}')" class="text-xs px-2.5 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-semibold">
+                <button type="button" onclick="adminToggleHealth('${m.id}', '${isHealthy ? "Sick" : "Healthy"}')" class="text-xs px-2.5 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-bold">
                   Mark ${isHealthy ? "Sick" : "Healthy"}
                 </button>
               </div>
@@ -1373,27 +1792,80 @@
                 if (bk) {
                   return `
                     <button type="button" onclick="openAdminSlotModal('${m.id}', ${m.floor}, ${s.slotNum}, '${s.timing}', '${inspectDate}')"
-                      class="p-2 rounded-xl border border-blue-300 bg-blue-50 text-left hover:bg-blue-100 transition">
+                      class="slot-card-mine p-2.5 rounded-xl text-left hover:opacity-95 transition">
                       <div class="flex items-center justify-between text-[10px] font-bold text-blue-900">
                         <span>#${s.slotNum}</span>
                         <span>Rm ${bk.roomNo}</span>
                       </div>
-                      <p class="text-[11px] font-bold text-slate-900 truncate mt-0.5">${escapeHtml(bk.studentName)}</p>
-                      <p class="text-[10px] text-slate-600 truncate">${escapeHtml(bk.rollNo)}</p>
+                      <p class="text-xs font-bold text-slate-900 truncate mt-0.5">${escapeHtml(bk.studentName)}</p>
+                      <p class="text-[10px] text-slate-700 truncate">${escapeHtml(bk.rollNo)} • ${escapeHtml(bk.phone || "")}</p>
                     </button>
                   `;
                 }
                 return `
                   <button type="button" onclick="openAdminSlotModal('${m.id}', ${m.floor}, ${s.slotNum}, '${s.timing}', '${inspectDate}')"
-                    class="p-2 rounded-xl border border-slate-200 bg-white hover:border-slate-400 text-left transition">
-                    <div class="flex items-center justify-between text-[10px] text-slate-500">
+                    class="slot-card-free p-2.5 rounded-xl text-left">
+                    <div class="flex items-center justify-between text-[10px] font-bold text-emerald-900">
                       <span>#${s.slotNum}</span>
-                      <span class="text-emerald-700 font-semibold">Free</span>
+                      <span>Free</span>
                     </div>
-                    <p class="text-[11px] font-mono font-semibold text-slate-800 mt-0.5">${s.timing}</p>
+                    <p class="text-xs font-bold text-emerald-950 mt-0.5">${s.timing}</p>
                   </button>
                 `;
               }).join("")}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderAdminComplaints() {
+      const container = document.getElementById("adminComplaintsContainer");
+      if (state.complaints.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 py-4">No maintenance requests found in Google Sheet.</p>`;
+        return;
+      }
+      container.innerHTML = state.complaints.map(c => {
+        const machObj = state.machines.find(m => m.id === c.machineId);
+        const machStatus = machObj ? machObj.status : "Healthy";
+        const isHealthy = machStatus === "Healthy";
+
+        return `
+          <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50/80 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-2.5 py-0.5 rounded bg-slate-900 text-white text-xs font-bold">${escapeHtml(c.machineId)} (Floor ${c.floor})</span>
+                <span class="text-xs font-bold text-slate-900">${escapeHtml(c.issueType)}</span>
+                <span class="text-xs text-slate-500">by <strong>${escapeHtml(c.studentName)}</strong> (${escapeHtml(c.rollNo)}, Rm ${escapeHtml(c.roomNo)}, Ph: ${escapeHtml(c.phone || "N/A")})</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${isHealthy ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800"}">
+                  Machine: ${machStatus}
+                </span>
+                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${c.status === "RESOLVED" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}">
+                  Ticket: ${escapeHtml(c.status)}
+                </span>
+              </div>
+            </div>
+
+            <p class="text-xs text-slate-800 bg-white p-3 rounded-xl border border-slate-200">${escapeHtml(c.description)}</p>
+
+            <div class="flex flex-wrap items-center gap-2 pt-1">
+              <input id="compNote_${c.ticketId}" type="text" value="${escapeHtml(c.adminNotes || "")}" placeholder="Enter maintenance action / resolution note..."
+                class="flex-1 min-w-[200px] rounded-xl border border-slate-300 px-3 py-1.5 text-xs bg-white" />
+
+              <button type="button" onclick="adminToggleHealth('${c.machineId}', '${isHealthy ? "Sick" : "Healthy"}')"
+                class="px-3 py-1.5 rounded-xl text-xs font-bold ${isHealthy ? "bg-rose-100 hover:bg-rose-200 text-rose-800" : "bg-emerald-100 hover:bg-emerald-200 text-emerald-800"}">
+                ${isHealthy ? "Mark " + c.machineId + " Sick" : "Mark " + c.machineId + " Healthy"}
+              </button>
+
+              <button type="button" onclick="adminResolveComplaint('${c.ticketId}', 'IN PROGRESS')" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold">
+                In Progress
+              </button>
+
+              <button type="button" onclick="adminResolveComplaint('${c.ticketId}', 'RESOLVED')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">
+                Resolve Ticket
+              </button>
             </div>
           </div>
         `;
@@ -1420,7 +1892,7 @@
             <p><strong>Email:</strong> ${escapeHtml(bk.email || "Not set")}</p>
           </div>
           <div class="flex items-center justify-end gap-2 pt-2">
-            <button type="button" onclick="adminCancelBooking('${bk.bookingId}'); closeAdminSlotModal();" class="px-3.5 py-2 rounded-xl bg-rose-600 text-white font-semibold">
+            <button type="button" onclick="adminCancelBooking('${bk.bookingId}'); closeAdminSlotModal();" class="px-3.5 py-2 rounded-xl bg-rose-600 text-white font-bold">
               Cancel &amp; Free Slot
             </button>
           </div>
@@ -1429,12 +1901,12 @@
         body.innerHTML = `
           <p class="text-slate-600">Assign this slot on <strong>${escapeHtml(dateStr)}</strong> to a resident Roll Number:</p>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Student Roll Number</label>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Student Roll Number</label>
             <input id="adminAssignRollInput" type="text" placeholder="e.g. HS22H059"
               class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs uppercase" />
           </div>
           <div class="flex justify-end pt-2">
-            <button type="button" onclick="confirmAdminAssignSlot()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold">
+            <button type="button" onclick="confirmAdminAssignSlot()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold">
               Assign Slot
             </button>
           </div>
@@ -1507,7 +1979,7 @@
             <div class="flex items-center justify-between">
               <div>
                 <span class="text-xs font-bold px-2.5 py-1 rounded-lg ${isHealthy ? "bg-slate-900 text-white" : "bg-rose-700 text-white"}">${m.id}</span>
-                <span class="text-xs font-semibold text-slate-500 ml-1.5">Floor ${m.floor}</span>
+                <span class="text-xs font-bold text-slate-500 ml-1.5">Floor ${m.floor}</span>
               </div>
               <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${isHealthy ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800"}">
                 ${m.status}
@@ -1519,13 +1991,13 @@
               <div class="flex items-center gap-1.5">
                 <input id="cycleInput_${m.id}" type="number" min="20" max="240" value="${m.cycleMins}"
                   class="w-16 rounded-lg border border-slate-300 px-2 py-1 text-xs font-bold text-right" />
-                <button type="button" onclick="adminUpdateCycleMins('${m.id}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold">
+                <button type="button" onclick="adminUpdateCycleMins('${m.id}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold">
                   Save
                 </button>
               </div>
             </div>
 
-            <p class="text-[11px] text-slate-500">${slotsPerDay} continuous slots per day</p>
+            <p class="text-xs text-slate-500">${slotsPerDay} continuous slots per day</p>
 
             <button type="button" onclick="adminToggleHealth('${m.id}', '${isHealthy ? "Sick" : "Healthy"}')"
               class="w-full py-2 rounded-xl text-xs font-bold transition ${isHealthy ? "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200" : "bg-emerald-600 hover:bg-emerald-700 text-white"}">
@@ -1560,43 +2032,12 @@
           showToast(res.error || "Could not update cycle time.", "error");
           return;
         }
-        showToast("Updated " + machineId + " cycle duration to " + val + " mins in Google Sheet.", "success");
+        showToast("Updated " + machineId + " cycle duration to " + val + " mins.", "success");
         await pullCloudState(true);
       } catch (err) {
         showToast("Error updating cycle time.", "error");
       }
     };
-
-    function renderAdminComplaints() {
-      const container = document.getElementById("adminComplaintsContainer");
-      if (state.complaints.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-400 py-4">No complaints reported in Google Sheet.</p>`;
-        return;
-      }
-      container.innerHTML = state.complaints.map(c => `
-        <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-2.5">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <span class="px-2 py-0.5 rounded bg-slate-900 text-white text-xs font-bold">${escapeHtml(c.machineId)} (Floor ${c.floor})</span>
-              <span class="text-xs font-bold text-slate-900 ml-2">${escapeHtml(c.issueType)}</span>
-              <span class="text-xs text-slate-500 ml-2">by ${escapeHtml(c.studentName)} (${escapeHtml(c.rollNo)}, Rm ${escapeHtml(c.roomNo)})</span>
-            </div>
-            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${c.status === "RESOLVED" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}">${escapeHtml(c.status)}</span>
-          </div>
-          <p class="text-xs text-slate-700">${escapeHtml(c.description)}</p>
-          <div class="flex flex-wrap items-center gap-2 pt-1">
-            <input id="compNote_${c.ticketId}" type="text" value="${escapeHtml(c.adminNotes || "")}" placeholder="Add resolution note..."
-              class="flex-1 rounded-xl border border-slate-300 px-3 py-1.5 text-xs bg-white" />
-            <button type="button" onclick="adminResolveComplaint('${c.ticketId}', 'RESOLVED')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold">
-              Resolve
-            </button>
-            <button type="button" onclick="adminResolveComplaint('${c.ticketId}', 'OPEN')" class="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold">
-              Reopen
-            </button>
-          </div>
-        </div>
-      `).join("");
-    }
 
     window.adminResolveComplaint = async function(ticketId, status) {
       const noteEl = document.getElementById("compNote_" + ticketId);
@@ -1604,13 +2045,13 @@
       try {
         const res = await apiPost("updateComplaint", { ticketId: ticketId, status: status, adminNotes: adminNotes });
         if (!res.ok) {
-          showToast(res.error || "Could not update complaint.", "error");
+          showToast(res.error || "Could not update ticket.", "error");
           return;
         }
-        showToast("Complaint updated in Google Sheet.", "success");
+        showToast("Ticket updated (" + status + ") in Google Sheet.", "success");
         await pullCloudState(true);
       } catch (err) {
-        showToast("Error updating complaint.", "error");
+        showToast("Error updating ticket.", "error");
       }
     };
 
@@ -1626,24 +2067,24 @@
       document.getElementById("stuCountLabel").textContent = String(filtered.length);
       const tbody = document.getElementById("adminStudentsTableBody");
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-slate-400">No matching students found in Google Sheet.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-slate-400">No matching students found.</td></tr>`;
         return;
       }
       tbody.innerHTML = filtered.slice(0, 150).map(s => `
         <tr class="hover:bg-slate-50">
-          <td class="py-2 px-3 font-mono font-semibold">${s.roomNo}</td>
-          <td class="py-2 px-3 font-mono font-bold text-blue-700">${escapeHtml(s.rollNo)}</td>
-          <td class="py-2 px-3 font-medium text-slate-900">${escapeHtml(s.name)}</td>
+          <td class="py-2 px-3 font-bold">${s.roomNo}</td>
+          <td class="py-2 px-3 font-bold text-blue-700">${escapeHtml(s.rollNo)}</td>
+          <td class="py-2 px-3 font-semibold text-slate-900">${escapeHtml(s.name)}</td>
           <td class="py-2 px-3 text-slate-500">${escapeHtml(s.program)}</td>
           <td class="py-2 px-3 text-slate-600">${escapeHtml(s.phone || "—")}</td>
           <td class="py-2 px-3">
             ${s.passwordUpdated
-              ? `<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold text-[10px]">YES</span>`
-              : `<span class="px-2 py-0.5 rounded bg-slate-100 text-slate-500 font-semibold text-[10px]">NO</span>`}
+              ? `<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]">YES</span>`
+              : `<span class="px-2 py-0.5 rounded bg-slate-100 text-slate-500 font-bold text-[10px]">NO</span>`}
           </td>
           <td class="py-2 px-3 text-right space-x-2">
-            <button type="button" onclick="adminLoadStudentForEdit('${s.rollNo}')" class="text-blue-600 hover:underline font-semibold">Edit</button>
-            <button type="button" onclick="adminResetStudentPW('${s.rollNo}')" class="text-rose-600 hover:underline font-semibold">Reset PW</button>
+            <button type="button" onclick="adminLoadStudentForEdit('${s.rollNo}')" class="text-blue-600 hover:underline font-bold">Edit</button>
+            <button type="button" onclick="adminResetStudentPW('${s.rollNo}')" class="text-rose-600 hover:underline font-bold">Reset PW</button>
           </td>
         </tr>
       `).join("");
@@ -1668,18 +2109,20 @@
           showToast(res.error || "Could not reset password.", "error");
           return;
         }
-        showToast("Password cleared in Google Sheet for " + rollNo + ". They can now register again with OTP.", "success");
+        showToast("Cleared password for " + rollNo + ".", "success");
         await pullCloudState(true);
       } catch (err) {
-        showToast("Error resetting student password.", "error");
+        showToast("Error resetting password.", "error");
       }
     };
 
     // =========================================================================
-    // EVENT LISTENERS WIRING
+    // 8. EVENT LISTENERS WIRING
     // =========================================================================
     window.addEventListener("DOMContentLoaded", async () => {
-      // Restore session if present
+      setupPwaLiteApp();
+      populateSevenDaysSelect();
+
       try {
         const savedSession = sessionStorage.getItem(SESSION_STORAGE_KEY);
         if (savedSession) {
@@ -1692,19 +2135,45 @@
         switchMainView(currentUser.role);
       }
 
+      // Install Lite App Button
+      document.getElementById("btnInstallApp").addEventListener("click", async () => {
+        if (deferredInstallPrompt) {
+          deferredInstallPrompt.prompt();
+          deferredInstallPrompt = null;
+        } else {
+          const m = document.getElementById("modalInstallApp");
+          m.classList.remove("hidden");
+          m.classList.add("flex");
+        }
+      });
+      document.getElementById("btnCloseInstallModal").addEventListener("click", () => {
+        const m = document.getElementById("modalInstallApp");
+        m.classList.add("hidden");
+        m.classList.remove("flex");
+      });
+      document.getElementById("btnRequestDeviceNotif").addEventListener("click", () => {
+        if ("Notification" in window) {
+          Notification.requestPermission().then(p => {
+            showToast("Phone notification status: " + p, p === "granted" ? "success" : "info");
+          });
+        } else {
+          showToast("Email notifications active via Google Sheet!", "success");
+        }
+      });
+
       // Auth Tab Switching
       document.getElementById("tabAuthStudent").addEventListener("click", () => {
         document.getElementById("panelStudentAuth").classList.remove("hidden");
         document.getElementById("panelAdminAuth").classList.add("hidden");
-        document.getElementById("tabAuthStudent").className = "py-3.5 text-xs sm:text-sm font-semibold border-b-2 border-blue-600 text-blue-600 bg-white transition";
-        document.getElementById("tabAuthAdmin").className = "py-3.5 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition";
+        document.getElementById("tabAuthStudent").className = "py-3 text-sm font-bold border-b-2 border-blue-600 text-blue-600 bg-white transition";
+        document.getElementById("tabAuthAdmin").className = "py-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition";
       });
 
       document.getElementById("tabAuthAdmin").addEventListener("click", () => {
         document.getElementById("panelAdminAuth").classList.remove("hidden");
         document.getElementById("panelStudentAuth").classList.add("hidden");
-        document.getElementById("tabAuthAdmin").className = "py-3.5 text-xs sm:text-sm font-semibold border-b-2 border-blue-600 text-blue-600 bg-white transition";
-        document.getElementById("tabAuthStudent").className = "py-3.5 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition";
+        document.getElementById("tabAuthAdmin").className = "py-3 text-sm font-bold border-b-2 border-blue-600 text-blue-600 bg-white transition";
+        document.getElementById("tabAuthStudent").className = "py-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition";
       });
 
       document.getElementById("btnCheckRoll").addEventListener("click", handleCheckRollClick);
@@ -1731,53 +2200,144 @@
         if (e.key === "Enter") handleAdminSignIn();
       });
 
+      // Student Forgot Password Modal
+      document.getElementById("btnOpenStuForgotModal").addEventListener("click", () => {
+        document.getElementById("stuResetRoll").value = pendingRollData ? pendingRollData.rollNo : document.getElementById("inputStudentRoll").value;
+        document.getElementById("stuResetRoom").value = "";
+        document.getElementById("stuResetStep2").classList.add("hidden");
+        const m = document.getElementById("modalStuForgot");
+        m.classList.remove("hidden");
+        m.classList.add("flex");
+      });
+      document.getElementById("btnCloseStuForgotModal").addEventListener("click", () => {
+        const m = document.getElementById("modalStuForgot");
+        m.classList.add("hidden");
+        m.classList.remove("flex");
+      });
+      document.getElementById("btnSendStuResetOtp").addEventListener("click", async () => {
+        const roll = document.getElementById("stuResetRoll").value.trim().toUpperCase();
+        const room = Number(document.getElementById("stuResetRoom").value || 0);
+        const btn = document.getElementById("btnSendStuResetOtp");
+        btn.disabled = true;
+        btn.textContent = "Sending...";
+        try {
+          const res = await apiPost("sendStudentResetOtp", { rollNo: roll, roomNo: room });
+          if (!res.ok) {
+            showToast(res.error || "Failed to send Reset OTP.", "error");
+            return;
+          }
+          document.getElementById("stuResetStep2").classList.remove("hidden");
+          showToast(res.message || "Reset OTP sent to your email!", "success");
+        } catch (e) {
+          showToast("Error requesting Reset OTP.", "error");
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Send OTP";
+        }
+      });
+      document.getElementById("btnConfirmStuReset").addEventListener("click", async () => {
+        const roll = document.getElementById("stuResetRoll").value.trim().toUpperCase();
+        const otp = document.getElementById("stuResetOtp").value.trim();
+        const newPass = document.getElementById("stuResetNewPass").value.trim();
+        try {
+          const res = await apiPost("confirmStudentResetPassword", { rollNo: roll, otp: otp, newPassword: newPass });
+          if (!res.ok) {
+            showToast(res.error || "Could not reset password.", "error");
+            return;
+          }
+          showToast(res.message || "Password updated!", "success");
+          const m = document.getElementById("modalStuForgot");
+          m.classList.add("hidden");
+          m.classList.remove("flex");
+        } catch (e) {
+          showToast("Error resetting password.", "error");
+        }
+      });
+
+      // Admin Forgot Password Modal
+      document.getElementById("btnOpenAdmForgotModal").addEventListener("click", () => {
+        document.getElementById("admResetStep2").classList.add("hidden");
+        const m = document.getElementById("modalAdmForgot");
+        m.classList.remove("hidden");
+        m.classList.add("flex");
+      });
+      document.getElementById("btnCloseAdmForgotModal").addEventListener("click", () => {
+        const m = document.getElementById("modalAdmForgot");
+        m.classList.add("hidden");
+        m.classList.remove("flex");
+      });
+      document.getElementById("btnSendAdmResetOtp").addEventListener("click", async () => {
+        const username = document.getElementById("admResetUser").value.trim().toLowerCase() || "admin";
+        const btn = document.getElementById("btnSendAdmResetOtp");
+        btn.disabled = true;
+        btn.textContent = "Sending...";
+        try {
+          const res = await apiPost("sendAdminResetOtp", { username: username });
+          if (!res.ok) {
+            showToast(res.error || "Could not send Admin Reset OTP.", "error");
+            return;
+          }
+          document.getElementById("admResetStep2").classList.remove("hidden");
+          showToast(res.message || "Reset OTP sent to Google Sheet owner!", "success");
+        } catch (e) {
+          showToast("Error sending Admin Reset OTP.", "error");
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Email Owner OTP";
+        }
+      });
+      document.getElementById("btnConfirmAdmReset").addEventListener("click", async () => {
+        const username = document.getElementById("admResetUser").value.trim().toLowerCase() || "admin";
+        const otp = document.getElementById("admResetOtp").value.trim();
+        const newPass = document.getElementById("admResetNewPass").value.trim();
+        try {
+          const res = await apiPost("confirmAdminResetPassword", { username: username, otp: otp, newPassword: newPass });
+          if (!res.ok) {
+            showToast(res.error || "Failed to reset Admin password.", "error");
+            return;
+          }
+          showToast(res.message || "Admin password reset!", "success");
+          const m = document.getElementById("modalAdmForgot");
+          m.classList.add("hidden");
+          m.classList.remove("flex");
+        } catch (e) {
+          showToast("Error resetting Admin password.", "error");
+        }
+      });
+
       document.getElementById("btnRefreshNow").addEventListener("click", () => pullCloudState(false));
 
       document.getElementById("btnLogout").addEventListener("click", () => {
         currentUser = null;
         pendingRollData = null;
+        hasClickedGo = false;
         saveSession();
         document.getElementById("boxFirstTimeSetup").classList.add("hidden");
         document.getElementById("boxReturningLogin").classList.add("hidden");
         switchMainView("auth");
       });
 
-      // Student Sub-Tabs
-      document.getElementById("tabStuBook").addEventListener("click", () => {
-        document.getElementById("panelStuBook").classList.remove("hidden");
-        document.getElementById("panelStuComplaint").classList.add("hidden");
-        document.getElementById("tabStuBook").className = "px-3.5 py-2 rounded-xl text-xs font-semibold bg-blue-600 text-white transition";
-        document.getElementById("tabStuComplaint").className = "px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition";
+      // Student Navigation Tabs
+      document.getElementById("tabStuBook").addEventListener("click", () => switchStudentTab("book"));
+      document.getElementById("tabStuMyBookings").addEventListener("click", () => switchStudentTab("mybookings"));
+      document.getElementById("tabStuComplaint").addEventListener("click", () => switchStudentTab("complaint"));
+
+      // Student "Go" Button for Day + Floor Selection
+      document.getElementById("btnStuGoSlots").addEventListener("click", () => {
+        selectedStuDate = document.getElementById("stuSelectDate").value;
+        selectedStuFloor = document.getElementById("stuSelectFloor").value;
+        hasClickedGo = true;
+        renderStudentFloorMachines();
       });
 
-      document.getElementById("tabStuComplaint").addEventListener("click", () => {
-        document.getElementById("panelStuComplaint").classList.remove("hidden");
-        document.getElementById("panelStuBook").classList.add("hidden");
-        document.getElementById("tabStuComplaint").className = "px-3.5 py-2 rounded-xl text-xs font-semibold bg-blue-600 text-white transition";
-        document.getElementById("tabStuBook").className = "px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition";
-        renderStudentComplaintsSection();
-      });
-
-      // Student Date & Floor Selection
-      document.getElementById("btnDateToday").addEventListener("click", () => {
-        selectedStuDate = TODAY_STR;
-        renderStudentPortal();
-      });
-      document.getElementById("btnDateTomorrow").addEventListener("click", () => {
-        selectedStuDate = TOMORROW_STR;
-        renderStudentPortal();
-      });
-      document.querySelectorAll(".stu-floor-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          selectedStuFloor = btn.getAttribute("data-floor");
-          renderStudentPortal();
-        });
-      });
-
-      // Booking Confirmation Modal Buttons
+      // Booking & Cancel Confirmation Modal Buttons
       document.getElementById("btnCloseBookingModal").addEventListener("click", closeBookingConfirmModal);
       document.getElementById("btnCancelBookingModal").addEventListener("click", closeBookingConfirmModal);
       document.getElementById("btnConfirmBookingSubmit").addEventListener("click", handleConfirmBookingSubmit);
+
+      document.getElementById("btnCloseCancelModal").addEventListener("click", closeCancelConfirmModal);
+      document.getElementById("btnKeepSlotModal").addEventListener("click", closeCancelConfirmModal);
+      document.getElementById("btnConfirmCancelSubmit").addEventListener("click", handleConfirmCancelSubmit);
 
       // Submit Student Complaint
       document.getElementById("btnSubmitComplaint").addEventListener("click", async () => {
@@ -1786,7 +2346,7 @@
         const issueType = document.getElementById("inputCompType").value;
         const desc = document.getElementById("inputCompDesc").value.trim();
         if (!desc) {
-          showToast("Please enter a brief description of the issue.", "warn");
+          showToast("Please enter a description of the issue.", "warn");
           return;
         }
         const machObj = state.machines.find(m => m.id === machId);
@@ -1802,14 +2362,14 @@
             description: desc
           });
           if (!res.ok) {
-            showToast(res.error || "Failed to submit complaint.", "error");
+            showToast(res.error || "Failed to submit request.", "error");
             return;
           }
           document.getElementById("inputCompDesc").value = "";
-          showToast("Issue reported to Admin!", "success");
+          showToast("Maintenance request submitted!", "success");
           await pullCloudState(true);
         } catch (err) {
-          showToast("Error submitting complaint.", "error");
+          showToast("Error submitting request.", "error");
         }
       });
 
@@ -1825,7 +2385,7 @@
       document.getElementById("adminFloorFilter").addEventListener("change", renderAdminBookingsAndGrid);
       document.getElementById("inputSearchStudents").addEventListener("input", renderAdminStudentDirectory);
 
-      // Admin Add/Edit Student in Google Sheet
+      // Admin Add/Edit Student
       document.getElementById("btnAdminSaveStudent").addEventListener("click", async () => {
         const roll = document.getElementById("admStuRoll").value.trim().toUpperCase();
         const name = document.getElementById("admStuName").value.trim();
@@ -1851,14 +2411,14 @@
             showToast(res.error || "Could not save student.", "error");
             return;
           }
-          showToast("Student record saved to Google Sheet (" + res.mode + ")!", "success");
+          showToast("Student saved to Google Sheet (" + res.mode + ")!", "success");
           await pullCloudState(true);
         } catch (err) {
-          showToast("Error saving student to Google Sheet.", "error");
+          showToast("Error saving student.", "error");
         }
       });
 
-      // Admin Update Admin Password in Google Sheet
+      // Admin Update Password
       document.getElementById("btnUpdateAdminCreds").addEventListener("click", async () => {
         const newUsername = document.getElementById("admNewUsername").value.trim().toLowerCase();
         const currentPassword = document.getElementById("admCurrentPassword").value.trim();
