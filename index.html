@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -58,12 +57,10 @@ body { background-color: #f8fafc; color: #0f172a; -webkit-tap-highlight-color: t
           <path d="M9.5 14c1-1.2 2-1.2 2.5 0s1.5 1.2 2.5 0" />
         </svg>
       </div>
-
       <div>
         <h1 id="headerBrandTitle" class="font-bold text-base sm:text-lg tracking-wide leading-tight">Narmada Hostel Laundry</h1>
         <p id="headerStatusText" class="text-xs text-slate-400 whitespace-nowrap">Connecting...</p>
       </div>
-      
     </div>
     <div class="flex items-center gap-2">
       <button id="btnRefreshNow" type="button" class="hidden text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 transition">Sync</button>
@@ -949,7 +946,7 @@ async function apiPost(action, payload) {
 
 async function pullCloudState(silent) {
   if (!state.scriptUrl) return;
-  if (!silent) setStatusText("Syncing with Google Sheet...");
+  if (!silent) setStatusText("Syncing...");
   try {
     const role = currentUser ? currentUser.role : "student";
     const rollNo = (currentUser && currentUser.role === "student" && currentUser.data) ? currentUser.data.rollNo : "";
@@ -968,7 +965,7 @@ async function pullCloudState(silent) {
       if (currentUser && currentUser.role === "admin") renderAdminPortal();
     }
   } catch (err) {
-    setStatusText("Google Sheet Ready");
+    setStatusText("IST " + formatClock12(istNowMins()));
   }
 }
 
@@ -1068,7 +1065,7 @@ async function handleSendOtpClick() {
 
 async function handleCompleteFirstTimeSetup() {
   if (!pendingRollData) return;
-  requestAlertPermission();   // inside the click gesture, so the browser will show its prompt
+  requestAlertPermission(); // inside the click gesture, so the browser will show its prompt
   const roomNo = Number(document.getElementById("inputVerifyRoom").value || 0);
   const phone = String(document.getElementById("inputSetupPhone").value || "").trim();
   const email = String(document.getElementById("inputSetupEmail").value || "").trim();
@@ -1095,7 +1092,7 @@ async function handleCompleteFirstTimeSetup() {
 
 async function handleReturningStudentSignIn() {
   if (!pendingRollData) return;
-  requestAlertPermission();   // click gesture
+  requestAlertPermission(); // click gesture
   const password = String(document.getElementById("inputLoginPassword").value || "").trim();
   const btn = document.getElementById("btnStudentSignIn");
   if (!password) { showToast("Please enter your password.", "warn"); return; }
@@ -1160,7 +1157,7 @@ function startTimers() {
   }, 15000);
 }
 
-  function switchMainView(view) {
+function switchMainView(view) {
   const vAuth = document.getElementById("viewAuth"), vStu = document.getElementById("viewStudent"), vAdm = document.getElementById("viewAdmin");
   const uBox = document.getElementById("headerUserBox"), uLbl = document.getElementById("headerUserLabel");
   const btnSyncNow = document.getElementById("btnRefreshNow");
@@ -1190,31 +1187,6 @@ function startTimers() {
     startTimers();
   } else {
     if (brandTitle) brandTitle.classList.remove("hidden");
-    vAuth.classList.remove("hidden"); uBox.classList.add("hidden"); uBox.classList.remove("flex"); btnSyncNow.classList.add("hidden");
-  }
-}
-
-  if (syncTimer) clearInterval(syncTimer);
-  if (tickTimer) clearInterval(tickTimer);
-
-  if (view === "student" && currentUser) {
-    vStu.classList.remove("hidden"); uBox.classList.remove("hidden"); uBox.classList.add("flex"); btnSyncNow.classList.remove("hidden");
-    uLbl.textContent = currentUser.data.name + " (" + currentUser.data.rollNo + ")";
-    populateSevenDaysSelect();
-    const rm = Number(currentUser.data.roomNo || 0);
-    if (rm >= 100 && rm < 500) {
-      selectedStuFloor = String(Math.min(3, Math.max(0, Math.floor(rm / 100) - 1)));
-      document.getElementById("stuSelectFloor").value = selectedStuFloor;
-    }
-    updateAlertBanner();
-    renderStudentPortal();
-    startTimers();
-  } else if (view === "admin" && currentUser) {
-    vAdm.classList.remove("hidden"); uBox.classList.remove("hidden"); uBox.classList.add("flex"); btnSyncNow.classList.remove("hidden");
-    uLbl.textContent = "Admin (" + currentUser.data.username + ")";
-    renderAdminPortal();
-    startTimers();
-  } else {
     vAuth.classList.remove("hidden"); uBox.classList.add("hidden"); uBox.classList.remove("flex"); btnSyncNow.classList.add("hidden");
   }
 }
@@ -1249,7 +1221,7 @@ function renderStudentPortal() {
   document.getElementById("stuBadgeRoll").textContent = stu.rollNo;
   document.getElementById("stuBadgeRoom").textContent = "Room " + stu.roomNo + (stu.program ? (" • " + stu.program) : "");
   document.getElementById("stuWelcomeTitle").textContent = stu.name;
-  document.getElementById("stuContactLine").textContent = "Phone: " + (stu.phone || "not set") + "  |  Email: " + (stu.email || "not set");
+  document.getElementById("stuContactLine").textContent = "Phone: " + (stu.phone || "not set") + " | Email: " + (stu.email || "not set");
   const mine = myLiveAndUpcoming();
   document.getElementById("stuActiveQuotaBadge").textContent = mine.length + "/" + MAX_ACTIVE_SLOTS;
   if (hasClickedGo) renderStudentFloorMachines();
@@ -1736,7 +1708,7 @@ function renderAdminMachinesFleet() {
       '<button type="button" onclick="adminUpdateCycleMins(\'' + m.id + '\')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold">Save</button></div></div>' +
       '<p class="text-xs text-slate-500">' + Math.floor(1440 / m.cycleMins) + ' continuous slots per day</p>' +
       '<button type="button" onclick="adminToggleHealth(\'' + m.id + '\',\'' + (healthy ? "Sick" : "Healthy") + '\')" class="w-full py-2 rounded-xl text-xs font-bold transition ' +
-      (healthy ? "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200" : "bg-emerald-600 hover:bg-emerald-700 text-white") + '">' + (healthy ? "Mark as Sick" : "Mark as Healthy") + '</button></div>';
+        (healthy ? "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200" : "bg-emerald-600 hover:bg-emerald-700 text-white") + '">' + (healthy ? "Mark as Sick" : "Mark as Healthy") + '</button></div>';
   }).join("");
 }
 
