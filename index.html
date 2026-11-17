@@ -959,7 +959,7 @@ async function pullCloudState(silent) {
       if (Array.isArray(data.history)) state.history = data.history;
       if (Array.isArray(data.complaints)) state.complaints = data.complaints;
       if (Array.isArray(data.students)) state.students = data.students;
-      setStatusText("Synced " + formatClock12(istNowMins()) + " IST");
+      setStatusText("" + formatClock12(istNowMins()) + "");
       checkLocalDeviceNotifications();
       if (currentUser && currentUser.role === "student") renderStudentPortal();
       if (currentUser && currentUser.role === "admin") renderAdminPortal();
