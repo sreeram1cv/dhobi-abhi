@@ -58,10 +58,12 @@ body { background-color: #f8fafc; color: #0f172a; -webkit-tap-highlight-color: t
           <path d="M9.5 14c1-1.2 2-1.2 2.5 0s1.5 1.2 2.5 0" />
         </svg>
       </div>
+
       <div>
-        <h1 class="font-bold text-base sm:text-lg tracking-wide leading-tight">Narmada Hostel Laundry</h1>
-        <p id="headerStatusText" class="text-xs text-slate-400">Connecting to Google Sheet...</p>
+        <h1 id="headerBrandTitle" class="font-bold text-base sm:text-lg tracking-wide leading-tight">Narmada Hostel Laundry</h1>
+        <p id="headerStatusText" class="text-xs text-slate-400 whitespace-nowrap">Connecting...</p>
       </div>
+      
     </div>
     <div class="flex items-center gap-2">
       <button id="btnRefreshNow" type="button" class="hidden text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 transition">Sync</button>
@@ -960,7 +962,7 @@ async function pullCloudState(silent) {
       if (Array.isArray(data.history)) state.history = data.history;
       if (Array.isArray(data.complaints)) state.complaints = data.complaints;
       if (Array.isArray(data.students)) state.students = data.students;
-      setStatusText("Live Google Sheet Connected (IST " + formatClock12(istNowMins()) + ")");
+      setStatusText("Synced " + formatClock12(istNowMins()) + " IST");
       checkLocalDeviceNotifications();
       if (currentUser && currentUser.role === "student") renderStudentPortal();
       if (currentUser && currentUser.role === "admin") renderAdminPortal();
@@ -1158,11 +1160,40 @@ function startTimers() {
   }, 15000);
 }
 
-function switchMainView(view) {
+  function switchMainView(view) {
   const vAuth = document.getElementById("viewAuth"), vStu = document.getElementById("viewStudent"), vAdm = document.getElementById("viewAdmin");
   const uBox = document.getElementById("headerUserBox"), uLbl = document.getElementById("headerUserLabel");
   const btnSyncNow = document.getElementById("btnRefreshNow");
+  const brandTitle = document.getElementById("headerBrandTitle");
   vAuth.classList.add("hidden"); vStu.classList.add("hidden"); vAdm.classList.add("hidden");
+  if (syncTimer) clearInterval(syncTimer);
+  if (tickTimer) clearInterval(tickTimer);
+
+  if (view === "student" && currentUser) {
+    if (brandTitle) brandTitle.classList.add("hidden");
+    vStu.classList.remove("hidden"); uBox.classList.remove("hidden"); uBox.classList.add("flex"); btnSyncNow.classList.remove("hidden");
+    uLbl.textContent = currentUser.data.name + " (" + currentUser.data.rollNo + ")";
+    populateSevenDaysSelect();
+    const rm = Number(currentUser.data.roomNo || 0);
+    if (rm >= 100 && rm < 500) {
+      selectedStuFloor = String(Math.min(3, Math.max(0, Math.floor(rm / 100) - 1)));
+      document.getElementById("stuSelectFloor").value = selectedStuFloor;
+    }
+    updateAlertBanner();
+    renderStudentPortal();
+    startTimers();
+  } else if (view === "admin" && currentUser) {
+    if (brandTitle) brandTitle.classList.add("hidden");
+    vAdm.classList.remove("hidden"); uBox.classList.remove("hidden"); uBox.classList.add("flex"); btnSyncNow.classList.remove("hidden");
+    uLbl.textContent = "Admin (" + currentUser.data.username + ")";
+    renderAdminPortal();
+    startTimers();
+  } else {
+    if (brandTitle) brandTitle.classList.remove("hidden");
+    vAuth.classList.remove("hidden"); uBox.classList.add("hidden"); uBox.classList.remove("flex"); btnSyncNow.classList.add("hidden");
+  }
+}
+
   if (syncTimer) clearInterval(syncTimer);
   if (tickTimer) clearInterval(tickTimer);
 
